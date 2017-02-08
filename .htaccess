@@ -1,0 +1,9 @@
+RewriteEngine on
+RewriteRule ^home?$ index.php
+RewriteRule ^edit?$ edit.php
+RewriteRule ^delete?$ delete.php
+RewriteRule ^inbox?$ inbox.php
+RewriteRule ^outbox?$ outbox.php
+RewriteRule ^maildel?$ delete_email.php
+RewriteRule ^trash?$ trash.php
+RewriteRule ^forcedelete?$ forcedelete_email.php

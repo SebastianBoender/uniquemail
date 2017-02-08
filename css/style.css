@@ -1,0 +1,25 @@
+
+
+.navbar_custom {
+	margin-bottom:0;
+	border-radius:0;
+	border-color: transparent;
+}
+
+.sidebar_custom {
+	height: 100%;
+	padding-top: 10px;
+}
+
+.main_panel {
+	margin-left: 10px;
+	margin-top: 10px;
+}
+
+.sidebar_ul {
+	padding-top: 10px;
+}
+
+.margin_bottom_null {
+	margin-bottom: 0px!important;
+}
