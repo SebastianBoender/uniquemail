@@ -16,13 +16,13 @@ function makesafe($val)
   $var = stripslashes($var);
   }
   
-  if(function_exists('mysql_real_escape_string'))
-  {
-   $var = mysql_real_escape_string($var);
-  }else
-  {
+  //if(function_exists('mysql_real_escape_string'))
+  //{
+  // $var = mysql_real_escape_string($var);
+  //}else
+  //{
      $var = addslashes($var);
-  }
+  //}
     
     return $var;
 }
