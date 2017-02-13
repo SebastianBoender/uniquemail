@@ -5,16 +5,17 @@ include("assets/header.php");
 //Set user id (klant nummer)
 $_SESSION['user_id'] = 1;
 $userid = makesafe($_SESSION["user_id"]);
+$i = 0;
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if(isset($userid)) {
-	echo getInbox($id, $userid);
+	echo emailController::getInbox($id, $userid);
 }
 
 
-if(isset($_SESSION['data'])) {
-    $data = $_SESSION['data'];
-    unset($_SESSION['data']);
+if(isset($_SESSION['dates'])) {
+    $data = $_SESSION['dates'];
+    unset($_SESSION['dates']);
 } else {
     $data = "";
 }
@@ -36,22 +37,26 @@ if(isset($_SESSION['data'])) {
   </tr>
 
 <?php
-foreach($data as $user):
+foreach($data as $key=>$waarde):
+if($i == 10){
+	break;
+} else {
 ?>
-
-
   <tr>
-    <td><?=$user["subject"]?></td>
-    <td><?=$user["sender"]?></td>
-    <td><?=$user["date"]?></td>
-    <td><?=$user["size"]?> kb</td>
-    <td><a href="maildel?mailid=<?=$user['id']?>"><span class="glyphicon glyphicon-trash"></span></td>
+    <td><?=$data[$key]['subject']?></td>
+    <td><?=$data[$key]['from']?>@<?=$data[$key]['host']?></td>
+    <td><?=$data[$key]['date']?></td>
+    <td><?=$data[$key]['size']/1000?> kb</td>
+    <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-trash"></span></td>
   </tr>
 
 
 <?php
+$i++;
+}
 endforeach;
 ?>
+
 
  </tbody>
 </table>

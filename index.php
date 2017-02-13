@@ -7,9 +7,12 @@ $_SESSION['user_id'] = 1;
 $userid = makesafe($_SESSION["user_id"]);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
-if (isset($_POST['email'])) {
+if (isset($_POST['email']) && isset($_POST['mail_server']) && isset($_POST['afzender']) && isset($_POST['password'])) {
 	$email = makesafe($_POST["email"]);
-    echo addEmail($email, $userid);
+  $afzender = makesafe($_POST["afzender"]);
+  $mailserver = makesafe($_POST["mail_server"]);
+  $password = makesafe($_POST["password"]);
+    echo emailController::addEmail($email, $userid, $afzender, $mailserver, $password);
     return;
 }
 
@@ -31,12 +34,10 @@ if (isset($_POST['email'])) {
   </tr>
 
 
-
-
 <?php
 
 
-echo getEmails($userid);
+echo emailController::getEmails($userid);
 
 if(isset($_SESSION["data"])) {
     $data = $_SESSION["data"];
@@ -63,8 +64,28 @@ endforeach;
 </table>
 
 <form method="POST">
-<input type="text" name="email">
+<p>
+  <label>Email</label>
+  <input type="text" name="email" placeholder="Email">
+</p>
+
+<p>
+  <label>Afzender naam</label>
+  <input type="text" name="afzender" placeholder="Afzender">
+</p>
+
+<p>
+  <label>Mail server</label>
+  <input type="text" name="mail_server" placeholder="Mail server">
+</p>
+
+<p>
+  <label>Wachtwoord</label>
+  <input type="password" name="password" placeholder="Wachtwoord">
+</p>
+
 <input type="hidden" name="userid" value="1">
+
 <input type="submit" class="btn btn-primary" value="add email">
 </form>
 

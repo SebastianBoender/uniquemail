@@ -9,7 +9,7 @@ $userid = makesafe($_SESSION["user_id"]);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if (isset($userid)) {
-	echo getOutbox($id, $userid);
+	echo emailController::getOutbox($id, $userid);
 }
 
 if(isset($_SESSION['outbox'])) {

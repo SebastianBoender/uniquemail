@@ -14,7 +14,7 @@ $userid = makesafe($_SESSION["user_id"]);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if (isset($emailid)) {
-    echo deleteEmail($emailid, $userid);
+    echo emailController::deleteEmail($emailid, $userid);
     return;
 }
 
