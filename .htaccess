@@ -7,3 +7,4 @@ RewriteRule ^outbox?$ outbox.php
 RewriteRule ^maildel?$ delete_email.php
 RewriteRule ^trash?$ trash.php
 RewriteRule ^forcedelete?$ forcedelete_email.php
+RewriteRule ^new?$ newemail.php

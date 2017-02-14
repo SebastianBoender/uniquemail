@@ -57,6 +57,7 @@ $i++;
 endforeach;
 ?>
 
+<a href="new" class="btn btn-primary">New email</a>
 
  </tbody>
 </table>

@@ -1,9 +1,9 @@
 <?php
 //Include all controller files
-foreach (glob("controllers/*.php") as $filename)
-{
-    include $filename;
-}
+require_once("controllers/database.php");
+require_once("controllers/safety_controller.php");
+require_once("controllers/imap_controller.php");
+require_once("controllers/email_controller.php");
 
 session_start();
 

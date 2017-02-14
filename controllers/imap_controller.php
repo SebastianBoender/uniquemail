@@ -1,14 +1,28 @@
 <?php
 
 class imapController{
-
 	public function getImap()
 	{
+		require('controllers/database.php');
+
 		global $date;
 		global $email_message;
+	
 		$date = array();
+		$id = $_GET['id'];
 
-		$mb = imap_open("{mail.mijndomein.nl:993/ssl}","test@youmad.nl", "Test1234" );
+		$st = $db->prepare("SELECT email, mail_server, password FROM email_accounts WHERE id = :id");
+		$st->bindValue(':id', $id);
+		$st->execute();
+
+		$result = $st->fetchAll();
+
+		$email_account = $result[0][0];
+		$mailserver = $result[0][1];
+		$password = $result[0][2];
+
+		$mb = imap_open("{".$mailserver."}",$email_account, $password );
+
 		$messageCount = imap_num_msg($mb);
 		for( $MID = 1; $MID <= $messageCount; $MID++ )
 		{
@@ -30,7 +44,7 @@ class imapController{
 		}
 
 	imapController::storeImap();
-	//echo '<pre>', print_r($EmailHeaders), '<pre>';
+//	echo '<pre>', print_r($result), '<pre>';
 	}
 
 
