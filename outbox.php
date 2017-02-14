@@ -6,6 +6,7 @@ include("assets/header.php");
 $_SESSION['user_id'] = 1;
 $id = makesafe($_GET["id"]);
 $userid = makesafe($_SESSION["user_id"]);
+$i = 0;
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if (isset($userid)) {
@@ -22,32 +23,36 @@ if(isset($_SESSION['outbox'])) {
 
 
 <div class="main col-md-9 main_panel">
-<h1>Welkom <?=$_SESSION['name']?></h1>
+<h1>Welkom Klant</h1>
                                          
 <div class="table-responsive" id="inbox">          
 <table class="table">
 <thead>
   <tr>
     <th style="width: 70%;">Onderwerp</th>
-    <th style="width: 10%;">Afzender</th>
+    <th style="width: 10%;">Ontvanger</th>
     <th style="width: 10%;">Datum</th>
     <th style="width: 10%;">Grootte</th>
   </tr>
 
 <?php
-foreach($data as $user):
+foreach($outbox as $key=>$waarde):
+if($i == 10){
+  break;
+} else {
 ?>
-
-
   <tr>
-    <td><?=$user["subject"]?></td>
-    <td><?=$user["receiver_email"]?></td>
-    <td><?=$user["date"]?></td>
-    <td><?=$user["size"]?> kb</td>
+    <td><?=$outbox[$key]['subject']?></td>
+    <td><?=$outbox[$key]['receiver']?></td>
+    <td><?=$outbox[$key]['date']?></td>
+    <td><?=$outbox[$key]['size']/1000?> kb</td>
+    <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-trash"></span></td>
   </tr>
 
 
 <?php
+$i++;
+}
 endforeach;
 ?>
 

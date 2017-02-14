@@ -104,10 +104,12 @@ class emailController extends imapController{
 	public function getInbox($id, $userid)
 	{
 		require('controllers/database.php');
+
 		global $date;
 		$i = 0;
 
-		imapController::getImap();
+		imapController::getImapInbox();
+
 		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND delete_date = '0000-00-00 00:00:00'");
 		$st->execute(array(
 			':id' => $id, 
@@ -123,6 +125,12 @@ class emailController extends imapController{
 	public function getOutbox($id, $userid)
 	{
 		require('controllers/database.php');
+		
+		global $date;
+		$i = 0;
+
+		imapController::getImapOutbox();
+
 		$st = $db->prepare("SELECT * FROM outbox WHERE email_id = :id AND user_id = :userid");
 		$st->execute(array(
 			':id' => $id, 

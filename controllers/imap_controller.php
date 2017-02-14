@@ -1,7 +1,7 @@
 <?php
 
 class imapController{
-	public function getImap()
+	public function getImapInbox()
 	{
 		require('controllers/database.php');
 
@@ -21,7 +21,9 @@ class imapController{
 		$mailserver = $result[0][1];
 		$password = $result[0][2];
 
-		$mb = imap_open("{".$mailserver."}",$email_account, $password );
+		$mb = imap_open("{".$mailserver."}", $email_account, $password );
+//		$mailboxes = imap_list($mb, "{".$mailserver."}", '*');
+//		var_dump($mailboxes);
 
 		$messageCount = imap_num_msg($mb);
 		for( $MID = 1; $MID <= $messageCount; $MID++ )
@@ -30,7 +32,6 @@ class imapController{
 			   $Body = imap_fetchbody( $mb, $MID, 1 );
 
 			   $date[$MID]['date'] = $EmailHeaders->date;
-			   $date[$MID]['sender'] = $EmailHeaders->sender;
 			   $date[$MID]['subject'] = $EmailHeaders->subject;
 	   		   $date[$MID]['size'] = $EmailHeaders->Size;
 	   		   $date[$MID]['timestamp'] = $EmailHeaders->udate;
@@ -43,12 +44,47 @@ class imapController{
 			}	
 		}
 
-	imapController::storeImap();
-//	echo '<pre>', print_r($result), '<pre>';
+	imapController::storeImapInbox();
+//	echo '<pre>', print_r($EmailHeaders), '<pre>';
 	}
 
+	public function getImapOutbox(){
+		require('controllers/database.php');
 
-	protected function storeImap()
+		global $outbox;
+		global $email_message;
+	
+		$outbox = array();
+		$id = $_GET['id'];
+
+		$st = $db->prepare("SELECT email, mail_server, password FROM email_accounts WHERE id = :id");
+		$st->bindValue(':id', $id);
+		$st->execute();
+
+		$result = $st->fetchAll();
+
+		$email_account = $result[0][0];
+		$mailserver = $result[0][1];
+		$password = $result[0][2];
+
+		$mb = imap_open("{".$mailserver."}INBOX.Sent", $email_account, $password );
+
+		$messageCount = imap_num_msg($mb);
+		for( $MID = 1; $MID <= $messageCount; $MID++ )
+		{
+			   $EmailHeaders = imap_headerinfo( $mb, $MID );
+			   $Body = imap_fetchbody( $mb, $MID, 1 );
+
+			   $outbox[$MID]['date'] = $EmailHeaders->date;
+			   $outbox[$MID]['receiver'] = $EmailHeaders->toaddress;
+			   $outbox[$MID]['subject'] = $EmailHeaders->subject;
+	   		   $outbox[$MID]['size'] = $EmailHeaders->Size;
+	   		   $outbox[$MID]['timestamp'] = $EmailHeaders->udate;
+	   		   $outbox[$MID]['message'] = $Body;
+		}
+	}
+
+	protected function storeImapInbox()
 	{
 		require('controllers/database.php');
 		
