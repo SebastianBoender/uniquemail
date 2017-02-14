@@ -6,6 +6,7 @@ include("assets/header.php");
 $_SESSION['user_id'] = 1;
 $userid = makesafe($_SESSION["user_id"]);
 $i = 0;
+$id = makesafe($_GET['id']);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if(isset($userid)) {
@@ -43,7 +44,7 @@ if($i == 10){
 } else {
 ?>
   <tr>
-    <td><?=$data[$key]['subject']?></td>
+    <td><a href="read?message=<?=$date[$key]["timestamp"]?>&email=<?=$id?>"><?=$data[$key]['subject']?></a></td>
     <td><?=$data[$key]['from']?>@<?=$data[$key]['host']?></td>
     <td><?=$data[$key]['date']?></td>
     <td><?=$data[$key]['size']/1000?> kb</td>

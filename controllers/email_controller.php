@@ -208,4 +208,20 @@ class emailController extends imapController{
 
 		return emailController::index();
 	}
+
+
+	public function getEmailMessage($id, $timestamp, $userid)
+	{
+		require('controllers/database.php');
+		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp LIMIT 1");
+		$st->execute(array(
+			':id' => $id, 
+			':userid' => $userid, 
+			':timestamp' => $timestamp
+			));
+
+		$result = $st->fetchAll();
+
+		$_SESSION['email_body'] = $result;
+	}
 }

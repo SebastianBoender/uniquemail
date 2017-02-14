@@ -41,7 +41,7 @@ class imapController{
 			{
 			   $date[$MID]['from'] = $from->mailbox;
 			   $date[$MID]['host'] = $from->host;
-			}	
+			}
 		}
 
 	imapController::storeImapInbox();
@@ -90,7 +90,7 @@ class imapController{
 		
 		global $date;
 		$userid = 1;
-		$emailid = 32;
+		$emailid = 40;
 		foreach($date as $key=>$waarde):
 			$st = $db->prepare("INSERT INTO inbox(subject, message, sender, sender_email, date, size, user_id, email_id, timestamp) VALUES(:subject, :message, :sender, :sender_email, :date, :size, :user_id, :email_id, :timestamp)");
 
