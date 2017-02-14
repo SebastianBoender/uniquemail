@@ -1,6 +1,6 @@
 <?php
-
 class imapController{
+
 	public function getImapInbox()
 	{
 		require('controllers/database.php');
@@ -101,8 +101,11 @@ class imapController{
 		require('controllers/database.php');
 		
 		global $date;
+
+		$emailid = $_GET['id'];
 		$userid = 1;
-		$emailid = 40;
+		
+//		$emailid = 40;
 		foreach($date as $key=>$waarde):
 			$st = $db->prepare("INSERT IGNORE INTO inbox(subject, message, sender, sender_email, date, size, user_id, email_id, timestamp) VALUES(:subject, :message, :sender, :sender_email, :date, :size, :user_id, :email_id, :timestamp)");
 

@@ -224,4 +224,13 @@ class emailController extends imapController{
 
 		$_SESSION['email_body'] = $result;
 	}
+
+
+	public function moveEmailTrash($id, $timestamp, $userid)
+	{
+		require('controllers/database.php');
+
+
+		
+	}
 }

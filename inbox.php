@@ -46,7 +46,7 @@ if($i == 10){
   <tr>
     <td><a href="read?message=<?=$date[$key]["timestamp"]?>&email=<?=$id?>"><?=$data[$key]['subject']?></a></td>
     <td><?=$data[$key]['from']?>@<?=$data[$key]['host']?></td>
-    <td><?=$data[$key]['date']?></td>
+    <td><?=mb_strimwidth($data[$key]['date'], 0, 25, "")?></td>
     <td><?=$data[$key]['size']/1000?> kb</td>
     <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-trash"></span></td>
   </tr>
