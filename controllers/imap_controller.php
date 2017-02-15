@@ -7,7 +7,7 @@ class imapController{
 
 		global $date;
 		global $email_message;
-	
+
 		$date = array();
 		$id = $_GET['id'];
 
@@ -30,6 +30,7 @@ class imapController{
 		{
 			   $EmailHeaders = imap_headerinfo( $mb, $MID );
 			   $Body = imap_fetchbody( $mb, $MID, 1 );
+		   	   $structure = imap_fetchstructure($mb, $MID);
 
 			   $date[$MID]['date'] = $EmailHeaders->date;
 			   $date[$MID]['subject'] = $EmailHeaders->subject;
@@ -48,10 +49,11 @@ class imapController{
 			   $date[$MID]['host'] = $from->host;
 			}
 			rsort($date);
+
 		}
 
 	imapController::storeImapInbox();
-//	echo '<pre>', print_r($EmailHeaders), '<pre>';
+	echo '<pre>', print_r($structure), '<pre>';
 	}
 
 	public function getImapOutbox(){
