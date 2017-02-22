@@ -5,6 +5,7 @@ include("assets/header.php");
 //Set user id (klant nummer)
 $_SESSION['user_id'] = 1;
 $id = makesafe($_GET["id"]);
+$i = 0;
 $userid = makesafe($_SESSION["user_id"]);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
@@ -42,7 +43,7 @@ foreach($data as $user):
 
   <tr>
     <td><?=$user["subject"]?></td>
-    <td><?=$user["sender"]?></td>
+    <td><?=$user["from"]?>@<?=$user["host"]?></td>
     <td><?=$user["date"]?></td>
     <td><?=$user["size"]?> kb</td>
     <td><a href="forcedelete?mailid=<?=$user['id']?>"><span class="glyphicon glyphicon-trash"></span></td>

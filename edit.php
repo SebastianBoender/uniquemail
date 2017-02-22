@@ -8,12 +8,14 @@ $id = makesafe($_GET["id"]);
 $userid = makesafe($_SESSION["user_id"]);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
-if (isset($_POST['email']) && isset($_POST['afzender']) && isset($_POST['mail_server']) && isset($_POST['password'])) {
+if (isset($_POST['email']) && isset($_POST['afzender']) && isset($_POST['mail_server']) && isset($_POST['password']) && isset($_POST['port']) && isset($_POST['ssl'])) {
 	$email = makesafe($_POST["email"]);
 	$afzender = makesafe($_POST["afzender"]);
 	$mailserver = makesafe($_POST["mail_server"]);
 	$password = makesafe($_POST["password"]);
-    echo emailController::editEmail($email, $id, $userid, $password, $mailserver, $afzender);
+	$ssl = makesafe($_POST['ssl']);
+	$port = makesafe($_POST['port']);
+    echo emailController::editEmail($email, $id, $userid, $password, $mailserver, $afzender, $port, $ssl);
     return;
 }
 
@@ -57,6 +59,17 @@ foreach($data as $user):
 <p>
 	<label>Mail server</label>
 	<input type="text" name="mail_server" placeholder="Mail server" value="<?=$user['mail_server']?>">
+</p>
+
+<p>
+  <label>Poort</label>
+  <input type="text" name="port" placeholder="Poort">
+</p>
+
+<p>
+  <label>SSL</label>
+  <input type="radio" name="ssl" value="ssl"> Yes
+  <input type="radio" name="ssl" value="ssl/novalidate-cert"> No<br>
 </p>
 
 <p>

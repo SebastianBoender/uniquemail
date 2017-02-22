@@ -39,6 +39,16 @@ foreach($email_body as $body):
 	<?=$body['subject']?>       
 </p>
 
+<?php
+if($body['attachment'] != '0'){
+echo '
+	<p>
+		<label>Attachments:</label><br/>
+		<a href="attachments/'.$body['attachment'].'">'.$body['attachment'].'</a>
+	</p>';
+}
+?>
+
 <p>
 	<label>Message:</label><br/>
 	<?=$body['message']?>

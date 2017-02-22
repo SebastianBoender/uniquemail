@@ -28,16 +28,18 @@ class emailController extends imapController{
 		$_SESSION['data'] = $result;
 	}
 
-	public function addEmail($email, $userid, $afzender, $mailserver, $password)
+	public function addEmail($email, $userid, $afzender, $mailserver, $password, $port, $ssl)
 	{
 		require('controllers/database.php');
+		$mailserver_final = "".$mailserver.":".$port."/".$ssl."";
+
 		$st = $db->prepare("INSERT INTO email_accounts(email, user_id, afzender, password, mail_server) VALUES(:email, :userid, :afzender, :password, :mail_server)");
 		$st->execute(array(
 			':email' => $email, 
 			':userid' => $userid, 
 			':afzender' => $afzender, 
 			':password' => $password, 
-			':mail_server' => $mailserver
+			':mail_server' => $mailserver_final
 			));
 
 		makesafe($_SESSION['email_add'] = 'success');
@@ -66,18 +68,31 @@ class emailController extends imapController{
 		}
 	}
 
-	public function editEmail($email, $id, $userid, $password, $mailserver, $afzender)
+	public function editEmail($email, $id, $userid, $password, $mailserver, $afzender, $port, $ssl)
 	{
 		require('controllers/database.php');
+		$mailserver_final = "".$mailserver.":".$port."/".$ssl."";
+
+		if(empty($password)){
+		$st = $db->prepare("UPDATE email_accounts SET email = :email, mail_server = :mail_server, afzender = :afzender WHERE id = :id AND user_id = :userid");
+		$st->execute(array(
+			':email' => $email, 
+			':id' => $id, 
+			':userid' => $userid,
+			':mail_server' => $mailserver_final,
+			':afzender' => $afzender
+			));
+		} else {
 		$st = $db->prepare("UPDATE email_accounts SET email = :email, password = :password, mail_server = :mail_server, afzender = :afzender WHERE id = :id AND user_id = :userid");
 		$st->execute(array(
 			':email' => $email, 
 			':id' => $id, 
 			':userid' => $userid,
 			':password' => $password,
-			':mail_server' => $mailserver,
+			':mail_server' => $mailserver_final,
 			':afzender' => $afzender
 			));
+		}
 
 		makesafe($_SESSION['email_edit'] = 'success');
 
@@ -110,14 +125,6 @@ class emailController extends imapController{
 
 		imapController::getImapInbox();
 
-		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND delete_date = '0000-00-00 00:00:00'");
-		$st->execute(array(
-			':id' => $id, 
-			':userid' => $userid
-			));
-
-		$result = $st->fetchAll();
-		$_SESSION['data'] = $result;
 		$_SESSION['dates'] = $date;
 	}
 
@@ -130,21 +137,17 @@ class emailController extends imapController{
 		$i = 0;
 
 		imapController::getImapOutbox();
-
-		$st = $db->prepare("SELECT * FROM outbox WHERE email_id = :id AND user_id = :userid");
-		$st->execute(array(
-			':id' => $id, 
-			':userid' => $userid
-			));
-
-		$result = $st->fetchAll();
-
-		$_SESSION['outbox'] = $result;
 	}
 
 	public function getTrash($id, $userid)
 	{
 		require('controllers/database.php');
+
+		global $trash;
+		$i = 0;
+
+		imapController::getImapTrash();
+
 		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND delete_date != '0000-00-00 00:00:00'");
 		$st->execute(array(
 			':id' => $id, 
@@ -153,7 +156,7 @@ class emailController extends imapController{
 
 		$result = $st->fetchAll();
 
-		$_SESSION['trash'] = $result;
+		$_SESSION['trash'] = $trash;
 	}
 
 
@@ -213,6 +216,7 @@ class emailController extends imapController{
 	public function getEmailMessage($id, $timestamp, $userid)
 	{
 		require('controllers/database.php');
+
 		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp LIMIT 1");
 		$st->execute(array(
 			':id' => $id, 

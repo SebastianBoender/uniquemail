@@ -67,7 +67,7 @@ function hideShowBCC() {
 	<label>Priority:</label><br/>
 	<select>
 	  <option value="5">Low Priority</option>
-	  <option value="3">Normal Priority</option>
+	  <option value="3"  selected="selected">Normal Priority</option>
 	  <option value="1">High Priority</option>
 	</select>
 </p>
