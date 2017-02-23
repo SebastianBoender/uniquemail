@@ -6,6 +6,15 @@ include("assets/header.php");
 $_SESSION['user_id'] = 1;
 $userid = makesafe($_SESSION["user_id"]);
 
+if(isset($_POST['concept'])){
+$timestamp = time();
+$subject = makesafe($_POST['subject']);
+$message = makesafe($_POST['message']);
+$receiver = makesafe($_POST['to']);
+$id = makesafe($_GET['id']);
+
+echo emailController::conceptEmail($id, $timestamp, $userid, $message, $receiver, $subject);
+}
 ?>
 
 <script>
@@ -37,6 +46,7 @@ function hideShowBCC() {
                                          
 <div class="table-responsive" id="inbox">
 
+<form method="POST">
 <p>
 	<label>To:</label><br/>
 	<input type="text" name="to" placeholder="To">
@@ -74,12 +84,13 @@ function hideShowBCC() {
 
 <p>
 	<label>Message</label><br/>
-	<textarea rows="4" cols="50"></textarea>
+	<textarea name="message" rows="4" cols="50"></textarea>
 </p>
 
 <p>
-	<input type="submit" value="Send Email" class="btn btn-primary">
+	<input type="submit" value="concept" name="concept" class="btn btn-primary">
 </p>
+</form>
 
 <!-- jQuery hosted library -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>

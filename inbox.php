@@ -46,9 +46,10 @@ if($i == 10){
   <tr>
     <td><a href="read?message=<?=$date[$key]["timestamp"]?>&email=<?=$id?>"><?=$data[$key]['subject']?></a></td>
     <td><?=$data[$key]['from']?>@<?=$data[$key]['host']?></td>
-    <td><?=mb_strimwidth($data[$key]['date'], 0, 25, "")?></td>
+    <td><?=date('d/m/Y', $data[$key]['date'])?></td>
     <td><?=$data[$key]['size']/1000?> kb</td>
     <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-trash"></span></td>
+        <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-floppy-disk"></span></td>
   </tr>
 
 
@@ -58,7 +59,7 @@ $i++;
 endforeach;
 ?>
 
-<a href="new" class="btn btn-primary">New email</a>
+<a href="new?id=<?=$_GET['id']?>" class="btn btn-primary">New email</a>
 
  </tbody>
 </table>

@@ -4,18 +4,19 @@ include("assets/header.php");
 
 //Set user id (klant nummer)
 $_SESSION['user_id'] = 1;
-$id = makesafe($_GET["id"]);
 $userid = makesafe($_SESSION["user_id"]);
 $i = 0;
+$id = makesafe($_GET['id']);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
-if (isset($userid)) {
-	echo emailController::getOutbox($id, $userid);
+if(isset($userid)) {
+	echo emailController::getConcepten($id, $userid);
 }
 
-if(isset($_SESSION['outbox'])) {
-    $data = $_SESSION['outbox'];
-    unset($_SESSION['outbox']);
+
+if(isset($_SESSION['concepten'])) {
+    $data = $_SESSION['concepten'];
+    unset($_SESSION['concepten']);
 } else {
     $data = "";
 }
@@ -29,24 +30,24 @@ if(isset($_SESSION['outbox'])) {
 <table class="table">
 <thead>
   <tr>
-    <th style="width: 70%;">Onderwerp</th>
+    <th style="width: 65%;">Onderwerp</th>
     <th style="width: 10%;">Ontvanger</th>
     <th style="width: 10%;">Datum</th>
-    <th style="width: 10%;">Grootte</th>
+    <th style="width: 5%;"></th>
   </tr>
 
 <?php
-foreach($outbox as $key=>$waarde):
+foreach($data as $concept):
 if($i == 10){
-  break;
+	break;
 } else {
 ?>
   <tr>
-    <td><?=$outbox[$key]['subject']?></td>
-    <td><?=$outbox[$key]['receiver']?></td>
-    <td><?=date('d/m/Y', $outbox[$key]['date'])?></td>
-    <td><?=$outbox[$key]['size']/1000?> kb</td>
+    <td><a href="read?message=<?=$concept["date"]?>&email=<?=$id?>"><?=$concept['subject']?></a></td>
+    <td><?=$concept['receiver']?></td>
+    <td><?=date('d/m/Y', $concept['date'])?></td>
     <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-trash"></span></td>
+        <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-floppy-disk"></span></td>
   </tr>
 
 
@@ -55,6 +56,8 @@ $i++;
 }
 endforeach;
 ?>
+
+<a href="new?id=<?=$_GET['id']?>" class="btn btn-primary">New email</a>
 
  </tbody>
 </table>

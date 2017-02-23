@@ -139,6 +139,23 @@ class emailController extends imapController{
 		imapController::getImapOutbox();
 	}
 
+	public function getConcepten($id, $userid)
+	{
+		require('controllers/database.php');
+		
+		$i = 0;
+
+		$st = $db->prepare("SELECT * FROM outbox WHERE email_id = :id AND user_id = :userid AND size = '0'");
+		$st->execute(array(
+			':id' => $id, 
+			':userid' => $userid
+			));
+
+		$result = $st->fetchAll();
+
+		$_SESSION['concepten'] = $result;
+	}
+
 	public function getTrash($id, $userid)
 	{
 		require('controllers/database.php');
@@ -236,5 +253,22 @@ class emailController extends imapController{
 
 
 		
+	}
+
+	public function conceptEmail($id, $timestamp, $userid, $message, $receiver, $subject)
+	{
+		require('controllers/database.php');
+
+		$st = $db->prepare("INSERT INTO outbox(subject, message, receiver, date, user_id, email_id) VALUES(:subject, :message, :receiver, :stamp, :user_id, :email_id)");
+		$st->execute(array(
+			':subject' => $subject, 
+			':message' => $message, 
+			':receiver' => $receiver, 
+			':stamp' => $timestamp, 
+			':user_id' => $userid,
+			':email_id' => $id
+			));
+
+
 	}
 }

@@ -83,7 +83,7 @@ class imapController{
 					}
 				}
 
-			   $date[$MID]['date'] = $EmailHeaders->date;
+			   $date[$MID]['date'] = strtotime($EmailHeaders->date);
 			   $date[$MID]['subject'] = $EmailHeaders->subject;
 
 			   if($date[$MID]['subject'] == ""){
@@ -136,7 +136,7 @@ class imapController{
 			   $EmailHeaders = imap_headerinfo( $mb, $MID );
 			   $Body = imap_fetchbody( $mb, $MID, 1 );
 
-			   $outbox[$MID]['date'] = $EmailHeaders->date;
+			   $outbox[$MID]['date'] = strtotime($EmailHeaders->date);
 			   $outbox[$MID]['receiver'] = $EmailHeaders->toaddress;
 			   $outbox[$MID]['subject'] = $EmailHeaders->subject;
 
@@ -178,7 +178,7 @@ class imapController{
 			   $EmailHeaders = imap_headerinfo( $mb, $MID );
 			   $Body = imap_fetchbody( $mb, $MID, 1 );
 
-			   $trash[$MID]['date'] = $EmailHeaders->date;
+			   $trash[$MID]['date'] = strtotime($EmailHeaders->date);
 			   $trash[$MID]['receiver'] = $EmailHeaders->toaddress;
 			   $trash[$MID]['subject'] = $EmailHeaders->subject;
 
@@ -240,6 +240,16 @@ class imapController{
 		//send the email using IMAP
 		$a = imap_mail($to, $subject, $body, $headers, $cc, $bcc, $return_path);
 		echo "Email sent!<br />";
+	}
+
+	public function imapMoveToTrash(){
+		require('controllers/database.php');
+
+		$emailid = $_GET['id'];
+		$userid = 1;
+
+		$EmailHeaders = imap_headerinfo( $mb, $MID );
+
 	}
 }
 
