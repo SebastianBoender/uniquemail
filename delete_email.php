@@ -9,12 +9,13 @@ session_start();
 
 //Set user id (klant nummer)
 $_SESSION['user_id'] = 1;
-$emailid = makesafe($_GET["mailid"]);
+$mid = makesafe($_GET["mid"]);
 $userid = makesafe($_SESSION["user_id"]);
+$id = makesafe($_GET["id"]);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
-if (isset($emailid)) {
-    echo emailController::deleteEmail($emailid, $userid);
+if (isset($mid)) {
+    echo imapController::imapMoveToTrash($mid, $id);
     return;
 }
 

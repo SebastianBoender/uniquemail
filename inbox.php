@@ -48,7 +48,7 @@ if($i == 10){
     <td><?=$data[$key]['from']?>@<?=$data[$key]['host']?></td>
     <td><?=date('d/m/Y', $data[$key]['date'])?></td>
     <td><?=$data[$key]['size']/1000?> kb</td>
-    <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-trash"></span></td>
+    <td><a href="maildel?mid=<?=$i?>&id=<?=$id?>"><span class="glyphicon glyphicon-trash"></span></td>
         <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-floppy-disk"></span></td>
   </tr>
 

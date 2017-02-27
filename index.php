@@ -18,8 +18,6 @@ if (isset($_POST['email']) && isset($_POST['mail_server']) && isset($_POST['afze
     return;
 }
 
-imapController::imapSend();
-
 ?>
 
 
