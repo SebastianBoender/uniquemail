@@ -9,4 +9,3 @@ RewriteRule ^trash?$ trash.php
 RewriteRule ^forcedelete?$ forcedelete_email.php
 RewriteRule ^new?$ newemail.php
 RewriteRule ^read?$ readInboxMessage.php
-RewriteRule ^concepten?$ concepten.php

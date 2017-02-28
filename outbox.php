@@ -44,7 +44,7 @@ if($i == 10){
   <tr>
     <td><?=$outbox[$key]['subject']?></td>
     <td><?=$outbox[$key]['receiver']?></td>
-    <td><?=date('d/m/Y', $outbox[$key]['date'])?></td>
+    <td><?=$outbox[$key]['date']?></td>
     <td><?=$outbox[$key]['size']/1000?> kb</td>
     <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-trash"></span></td>
   </tr>

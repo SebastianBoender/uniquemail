@@ -69,7 +69,7 @@ class imapController{
 							$attachments[$i]['attachment'] = imap_fetchbody($mb, $MID, $i+1);
 							if($structure->parts[$i]->encoding == 3) { // 3 = BASE64
 								$attachments[$i]['attachment'] = base64_decode($attachments[$i]['attachment']);
-								file_put_contents('attachments'.$attachments[$i]['filename'].'', $attachments[$i]['attachment']);
+								file_put_contents('attachments/'.$attachments[$i]['filename'].'', $attachments[$i]['attachment']);
 							}
 							elseif($structure->parts[$i]->encoding == 4) { // 4 = QUOTED-PRINTABLE
 								$attachments[$i]['attachment'] = quoted_printable_decode($attachments[$i]['attachment']);
@@ -104,7 +104,7 @@ class imapController{
 		}
 
 				//	   echo '<pre>', print_r($attachments), '<pre>';
-					   file_put_contents('attachments'.$attachments[1]['filename'].'', $attachments[1]['attachment']);
+					 
 
 	imapController::storeImapInbox();
 	}

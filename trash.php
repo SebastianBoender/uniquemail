@@ -44,7 +44,7 @@ foreach($data as $user):
   <tr>
     <td><?=$user["subject"]?></td>
     <td><?=$user["from"]?>@<?=$user["host"]?></td>
-    <td><?=date('d/m/Y', $user["date"])?></td>
+    <td><?=$user["date"]?></td>
     <td><?=$user["size"]?> kb</td>
     <td><a href="forcedelete?mailid=<?=$user['id']?>"><span class="glyphicon glyphicon-trash"></span></td>
   </tr>
