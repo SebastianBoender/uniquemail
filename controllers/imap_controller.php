@@ -30,9 +30,12 @@ class imapController{
 		$messageCount = imap_num_msg($mb);
 		for( $MID = 1; $MID <= $messageCount; $MID++ )
 		{
-			   $EmailHeaders = imap_headerinfo( $mb, $MID );
-			   $Body = imap_fetchbody( $mb, $MID, 2 );
+			   $EmailHeaders = imap_headerinfo( $mb, $MID ); 
+			   $Body = imap_fetchbody( $mb, $MID, 1 );
+			   $Body_html = imap_fetchbody( $mb, $MID, 2 );
 		   	   $structure = imap_fetchstructure($mb, $MID);
+
+//		echo '<pre>', print_r($EmailHeaders), '<pre>';
 
 				if(isset($structure->parts) && count($structure->parts)) {
 
@@ -90,21 +93,34 @@ class imapController{
 			   	$date[$MID]['subject'] = "(Geen onderwerp)";
 			   }
 
+			   $date[$MID]['cc'] = "";
+			   if(isset($EmailHeaders->ccaddress)){
+			   	$date[$MID]['cc'] = $EmailHeaders->ccaddress;
+			   }
 	   		   $date[$MID]['size'] = $EmailHeaders->Size;
 	   		   $date[$MID]['timestamp'] = $EmailHeaders->udate;
 	   		   $date[$MID]['message'] = $Body;
+	   		   $date[$MID]['message_html'] = $Body_html;
+	   		   $date[$MID]['mid'] = $MID;
 			 
-			foreach($EmailHeaders->from as $from )
-			{
-			   $date[$MID]['from'] = $from->mailbox;
-			   $date[$MID]['host'] = $from->host;
+			if(isset($EmailHeaders->from)){
+				foreach($EmailHeaders->from as $from )
+				{
+					if(isset($from->personal)){
+					   $date[$MID]['personal'] = $from->personal;
+					} else {
+					   $date[$MID]['personal'] = "".$from->mailbox."@".$from->host."";
+					}
+			    $date[$MID]['from'] = "".$from->mailbox."@".$from->host."";
+				}
+
 			}
 			rsort($date);
 
 		}
 
-				//	   echo '<pre>', print_r($attachments), '<pre>';
-					 
+//				   echo '<pre>', print_r($EmailHeaders), '<pre>';
+				   file_put_contents('attachments/'.$attachments[1]['filename'].'', $attachments[1]['attachment']);
 
 	imapController::storeImapInbox();
 	}
@@ -195,8 +211,11 @@ class imapController{
 	   		   $trash[$MID]['size'] = $EmailHeaders->Size;
 	   		   $trash[$MID]['timestamp'] = $EmailHeaders->udate;
 	   		   $trash[$MID]['message'] = $Body;
+	   		   $trash[$MID]['mid'] = $MID;
 		}
 		rsort($trash);
+
+		imapController::storeImapTrash();
 	}
 
 	protected function storeImapInbox()
@@ -210,13 +229,16 @@ class imapController{
 		
 //		$emailid = 40;
 		foreach($date as $key=>$waarde):
-			$st = $db->prepare("INSERT IGNORE INTO inbox(subject, message, sender, sender_email, date, size, user_id, email_id, timestamp, attachment) VALUES(:subject, :message, :sender, :sender_email, :date, :size, :user_id, :email_id, :timestamp, :attachment)");
+			$st = $db->prepare("INSERT IGNORE INTO inbox(subject, message, message_html, sender, sender_email, cc, bcc, date, size, user_id, email_id, timestamp, attachment) VALUES(:subject, :message, :message_html, :sender, :sender_email, :cc, :bcc, :date, :size, :user_id, :email_id, :timestamp, :attachment)");
 
 			$st->execute(array(
 				':subject' => $date[$key]["subject"], 
 				':message' => $date[$key]['message'],
-				':sender' => 'test', 
-				':sender_email' =>  'test', 
+				':message_html' => quoted_printable_decode($date[$key]['message_html']),
+				':sender' => $date[$key]['personal'], 
+				':sender_email' =>  $date[$key]['from'], 
+				':cc' => $date[$key]["cc"],
+				':bcc' => '',
 				':date' => $date[$key]['date'], 
 				':size' => $date[$key]["size"], 
 				':user_id' => $userid, 
@@ -227,29 +249,199 @@ class imapController{
 		endforeach;
 	}
 
-	public function imapSend(){
-		//for demo purposes we are gonna send an email to ourselves
-		$to = "sebas@youmad.nl";
-		$subject = "Test Email";
-		$body = "This is only a test.";
-		$headers = "From: test@youmad.nl\r\n".
-		           "Reply-To: test@youmad.nl\r\n";
-		$cc = null;
-		$bcc = null;
-		$return_path = "test@youmad.nl";
-		//send the email using IMAP
-		$a = imap_mail($to, $subject, $body, $headers, $cc, $bcc, $return_path);
-		echo "Email sent!<br />";
+	public function getImapJunk(){
+		require('controllers/database.php');
+
+		global $junk;
+
+		$junk = array();
+		$id = $_GET['id'];
+
+		$st = $db->prepare("SELECT email, mail_server, password FROM email_accounts WHERE id = :id");
+		$st->bindValue(':id', $id);
+		$st->execute();
+
+		$result = $st->fetchAll();
+
+		$email_account = $result[0][0];
+		$mailserver = $result[0][1];
+		$password = $result[0][2];
+
+		$mb = imap_open("{".$mailserver."}INBOX.Spam", $email_account, $password) or die('Failed to connect to the server: <br/>' . imap_last_error());
+//		$mailboxes = imap_list($mb, "{".$mailserver."}", '*');
+//		var_dump($mb);
+
+		$messageCount = imap_num_msg($mb);
+		for( $MID = 1; $MID <= $messageCount; $MID++ )
+		{
+			   $EmailHeaders = imap_headerinfo( $mb, $MID );
+			   $Body = imap_fetchbody( $mb, $MID, 1 );
+
+			   $junk[$MID]['date'] = strtotime($EmailHeaders->date);
+			   $junk[$MID]['receiver'] = $EmailHeaders->toaddress;
+			   $junk[$MID]['subject'] = $EmailHeaders->subject;
+
+			   if($junk[$MID]['subject'] == ""){
+			   	$junk[$MID]['subject'] = "(Geen onderwerp)";
+			   }
+
+	   		   $junk[$MID]['size'] = $EmailHeaders->Size;
+	   		   $junk[$MID]['timestamp'] = $EmailHeaders->udate;
+	   		   $junk[$MID]['message'] = $Body;
+
+	   		    foreach($EmailHeaders->from as $from )
+				{
+				   $junk[$MID]['from'] = $from->mailbox;
+				   $junk[$MID]['host'] = $from->host;
+				}
+
+				$junk[$MID]['attachment_file'] = "";
+		}
+		rsort($junk);
+
+		imapController::storeImapJunk();
+
+		$_SESSION['junk'] = $junk;
 	}
 
-	public function imapMoveToTrash(){
+	protected function storeImapJunk()
+	{
 		require('controllers/database.php');
+		
+		global $junk;
 
 		$emailid = $_GET['id'];
 		$userid = 1;
+		
+//		$emailid = 40;
+		foreach($junk as $key=>$waarde):
+			$st = $db->prepare("INSERT IGNORE INTO junk(subject, message, sender, sender_email, date, size, user_id, email_id, timestamp, attachment) VALUES(:subject, :message, :sender, :sender_email, :date, :size, :user_id, :email_id, :timestamp, :attachment)");
 
-		$EmailHeaders = imap_headerinfo( $mb, $MID );
+			$st->execute(array(
+				':subject' => $junk[$key]["subject"], 
+				':message' => $junk[$key]['message'],
+				':sender' => 'test', 
+				':sender_email' =>  'test', 
+				':date' => $junk[$key]['date'], 
+				':size' => $junk[$key]["size"], 
+				':user_id' => $userid, 
+				':email_id' => $emailid, 
+				':timestamp' => $junk[$key]["timestamp"],
+				':attachment' => $junk[$key]["attachment_file"]
+				));
+		endforeach;
+	}
 
+
+	protected function storeImapTrash()
+	{
+		require('controllers/database.php');
+		
+		global $trash;
+
+		$emailid = $_GET['id'];
+		$userid = 1;
+		
+//		$emailid = 40;
+		foreach($trash as $key=>$waarde):
+			$st = $db->prepare("INSERT IGNORE INTO trash(subject, message, sender, sender_email, date, size, user_id, email_id, timestamp) VALUES(:subject, :message, :sender, :sender_email, :date, :size, :user_id, :email_id, :timestamp)");
+
+			$st->execute(array(
+				':subject' => $trash[$key]["subject"], 
+				':message' => $trash[$key]['message'],
+				':sender' => 'test', 
+				':sender_email' =>  'test', 
+				':date' => $trash[$key]['date'], 
+				':size' => $trash[$key]["size"], 
+				':user_id' => $userid, 
+				':email_id' => $emailid, 
+				':timestamp' => $trash[$key]["timestamp"]
+				));
+		endforeach;
+	}
+
+
+	public function imapMoveToTrash($emailid, $id){
+		require('controllers/database.php');
+
+		$userid = 1;
+
+		$st = $db->prepare("SELECT email, mail_server, password FROM email_accounts WHERE id = :id");
+		$st->bindValue(':id', $id);
+		$st->execute();
+
+		$result = $st->fetchAll();
+
+		$email_account = $result[0][0];
+		$mailserver = $result[0][1];
+		$password = $result[0][2];
+
+
+		$mb = imap_open("{".$mailserver."}", $email_account, $password) or die('Failed to connect to the server: <br/>' . imap_last_error());
+		$mailboxes = imap_list($mb, "{".$mailserver."}", '*');
+
+		var_dump($mailboxes, $emailid, $id);
+
+		imap_mail_move($mb, $emailid, "INBOX.Trash");
+		imap_expunge($mb);
+
+		return emailController::index();
+	}
+
+
+	public function deleteFromTrash($emailid, $id){
+		require('controllers/database.php');
+		
+		$userid = 1;
+
+		$st = $db->prepare("SELECT email, mail_server, password FROM email_accounts WHERE id = :id");
+		$st->bindValue(':id', $id);
+		$st->execute();
+
+		$result = $st->fetchAll();
+
+		$email_account = $result[0][0];
+		$mailserver = $result[0][1];
+		$password = $result[0][2];
+
+
+		$mb = imap_open("{".$mailserver."}INBOX.Trash", $email_account, $password) or die('Failed to connect to the server: <br/>' . imap_last_error());
+		$mailboxes = imap_list($mb, "{".$mailserver."}", '*');
+
+		var_dump($mailboxes, $emailid, $id);
+
+		imap_delete($mb, $emailid);
+		imap_expunge($mb);
+
+		return emailController::index();
+	}
+
+
+	public function undelete($emailid, $id){
+		require('controllers/database.php');
+		
+		$userid = 1;
+
+		$st = $db->prepare("SELECT email, mail_server, password FROM email_accounts WHERE id = :id");
+		$st->bindValue(':id', $id);
+		$st->execute();
+
+		$result = $st->fetchAll();
+
+		$email_account = $result[0][0];
+		$mailserver = $result[0][1];
+		$password = $result[0][2];
+
+
+		$mb = imap_open("{".$mailserver."}INBOX.Trash", $email_account, $password) or die('Failed to connect to the server: <br/>' . imap_last_error());
+		$mailboxes = imap_list($mb, "{".$mailserver."}", '*');
+
+		var_dump($mailboxes, $emailid, $id);
+
+		imap_mail_move($mb, $emailid, "INBOX");
+		imap_expunge($mb);
+
+		return emailController::index();
 	}
 }
 

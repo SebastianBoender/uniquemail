@@ -7,17 +7,22 @@ $_SESSION['user_id'] = 1;
 $userid = makesafe($_SESSION["user_id"]);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
-if (isset($_POST['email']) && isset($_POST['mail_server']) && isset($_POST['afzender']) && isset($_POST['password']) && isset($_POST['ssl']) && isset($_POST['port'])) {
+if (isset($_POST['email']) && isset($_POST['mail_server']) && isset($_POST['afzender']) && isset($_POST['password']) && isset($_POST['ssl']) && isset($_POST['port']))
+{
 	$email = makesafe($_POST["email"]);
   $afzender = makesafe($_POST["afzender"]);
   $mailserver = makesafe($_POST["mail_server"]);
   $password = makesafe($_POST["password"]);
   $port = makesafe($_POST['port']);
   $ssl = makesafe($_POST['ssl']);
-    echo emailController::addEmail($email, $userid, $afzender, $mailserver, $password, $port, $ssl);
-    return;
-}
 
+  if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    echo 'Invalid email format'; 
+  } else {
+    echo emailController::addEmail($email, $userid, $afzender, $mailserver, $password, $port, $ssl, $mailto, $mailsender, $bcc, $cc);
+    return;
+  }
+}
 ?>
 
 

@@ -58,18 +58,25 @@ foreach($data as $user):
 
 <p>
 	<label>Mail server</label>
-	<input type="text" name="mail_server" placeholder="Mail server" value="<?=$user['mail_server']?>">
+	<input type="text" name="mail_server" placeholder="Mail server" value="<?=$launch[0]?>">
 </p>
 
 <p>
   <label>Poort</label>
-  <input type="text" name="port" placeholder="Poort">
+  <input type="text" value="<?=$launch[1]?>" name="port" placeholder="Poort">
 </p>
 
 <p>
   <label>SSL</label>
-  <input type="radio" name="ssl" value="ssl"> Yes
-  <input type="radio" name="ssl" value="ssl/novalidate-cert"> No<br>
+  <?php
+  if($launch[2] == "ssl"){
+  echo '<input type="radio" name="ssl" checked="checked" value="ssl"> Yes
+  <input type="radio" name="ssl" value="ssl/novalidate-cert"> No<br>';
+	}else{
+		  echo '<input type="radio" name="ssl" value="ssl"> Yes
+  <input type="radio" checked="checked" name="ssl" value="ssl/novalidate-cert"> No<br>';
+	}
+	?>
 </p>
 
 <p>

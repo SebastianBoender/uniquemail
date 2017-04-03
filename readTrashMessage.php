@@ -9,7 +9,7 @@ $timestamp = makesafe($_GET['message']);
 $id = makesafe($_GET['id']);
 
 if(isset($timestamp) && isset($_GET['message']) && isset($id) && isset($_GET['id'])){
-	echo emailController::getEmailMessage($id, $timestamp, $userid);
+	echo emailController::getEmailTrash($id, $timestamp, $userid);
 }
 
 if(isset($_SESSION['email_body'])){
@@ -29,38 +29,15 @@ if(isset($_SESSION['email_body'])){
 foreach($email_body as $body):
 ?>
 
-<a href="reply?message=<?=$_GET['message']?>&id=<?=$id?>" class="btn btn-primary">Reply</a>
-<a href="forward?message=<?=$_GET['message']?>&id=<?=$id?>" class="btn btn-primary">Forward</a>
-
-<br/><br/>
-
 <p>
 	<label>From:</label><br/>
 	<?=$body['sender']?>
 </p>
 
-<?php
-if($body['cc'] != ""){
-
-echo '<p>
-		<label>CC:</label><br/>
-		'.$body["cc"].'
-	 </p>';
-}
-?>
-
 <p>
 	<label>Subject:</label><br/>
 	<?=$body['subject']?>       
 </p>
-
-<p>
-	<label>Date:</label><br/>
-	<?=date('d/m/Y', $body['date'])?>       
-</p>
-
-
-<br/><br/>
 
 <?php
 if($body['attachment'] != '0'){
@@ -74,13 +51,7 @@ echo '
 
 <p>
 	<label>Message:</label><br/>
-	<?php
-	if(!$body['message_html']){
-		echo nl2br($body['message']);
-	} else {
-		echo quoted_printable_decode($body['message_html']);
-	}
-	?>
+	<?=$body['message']?>
 </p>
 
 <?php

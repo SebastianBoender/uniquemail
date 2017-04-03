@@ -10,15 +10,18 @@ $id = makesafe($_GET['id']);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if(isset($userid)) {
-	echo emailController::getInbox($id, $userid);
+	echo imapController::getImapJunk($id, $userid);
 }
 
 
-if(isset($_SESSION['dates'])) {
-    $data = $_SESSION['dates'];
-    unset($_SESSION['dates']);
+imapController::imapSend();
+
+
+if(isset($_SESSION['junk'])) {
+    $junk = $_SESSION['junk'];
+    unset($_SESSION['junk']);
 } else {
-    $data = "";
+    $junk = "";
 }
 ?>
 
@@ -38,17 +41,18 @@ if(isset($_SESSION['dates'])) {
   </tr>
 
 <?php
-foreach($data as $key=>$waarde):
+foreach($junk as $key=>$waarde):
 if($i == 10){
 	break;
 } else {
 ?>
   <tr>
-    <td><a href="read?message=<?=$date[$key]["timestamp"]?>&id=<?=$id?>"><?=$data[$key]['subject']?></a></td>
-    <td><?=$data[$key]['personal']?></td>
-    <td><?=date('d/m/Y', $data[$key]['date'])?></td>
-    <td><?=$data[$key]['size']/1000?> kb</td>
-    <td><a href="maildel?mailid=<?=$data[$key]['mid']?>&id=<?=$id?>"><span class="glyphicon glyphicon-trash"></span></td>
+    <td><a href="readspam?message=<?=$junk[$key]["timestamp"]?>&id=<?=$id?>"><?=$junk[$key]['subject']?></a></td>
+    <td><?=$junk[$key]['from']?>@<?=$junk[$key]['host']?></td>
+    <td><?=date('d/m/Y', $junk[$key]['date'])?></td>
+    <td><?=$junk[$key]['size']/1000?> kb</td>
+    <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-trash"></span></td>
+        <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-floppy-disk"></span></td>
   </tr>
 
 

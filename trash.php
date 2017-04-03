@@ -10,7 +10,7 @@ $userid = makesafe($_SESSION["user_id"]);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if (isset($userid)) {
-	echo emailController::getTrash($id, $userid);
+	echo imapController::getImapTrash($id, $userid);
 }
 
 if(isset($_SESSION['trash'])) {
@@ -37,16 +37,17 @@ if(isset($_SESSION['trash'])) {
   </tr>
 
 <?php
-foreach($data as $user):
+foreach($trash as $user):
 ?>
 
 
   <tr>
-    <td><?=$user["subject"]?></td>
+    <td><a href="readtrash?message=<?=$user["timestamp"]?>&id=<?=$id?>"><?=$user['subject']?></a></td>
     <td><?=$user["from"]?>@<?=$user["host"]?></td>
-    <td><?=$user["date"]?></td>
+    <td><?=date('d/m/Y', $user["date"])?></td>
     <td><?=$user["size"]?> kb</td>
-    <td><a href="forcedelete?mailid=<?=$user['id']?>"><span class="glyphicon glyphicon-trash"></span></td>
+    <td><a href="forcedeletemessage?mailid=<?=$user['mid']?>&id=<?=$id?>"><span class="glyphicon glyphicon-trash"></span></td>
+    <td><a href="undelete?mailid=<?=$user['mid']?>&id=<?=$id?>"><span class="glyphicon glyphicon-share-alt"></span></td>
   </tr>
 
 

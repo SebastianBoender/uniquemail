@@ -1,7 +1,7 @@
 <?php
 class emailController extends imapController{
 
-	private function index()
+	public function index()
 	{
 		if(isset($_SERVER['HTTP_REFERER'])) {
 	    	$previous = $_SERVER['HTTP_REFERER'];
@@ -47,8 +47,18 @@ class emailController extends imapController{
 		return emailController::index();
 	}
 
+
+	public function multiexplode ($delimiters,$string) {
+	    global $launch;
+
+	    $ready = str_replace($delimiters, $delimiters[0], $string);
+	    $launch = explode($delimiters[0], $ready);
+	    return  $launch;
+	}
+
 	public function getSingleEmail($id, $userid)
 	{
+		global $launch;
 		require('controllers/database.php');
 		$st = $db->prepare("SELECT * FROM email_accounts WHERE id = :id AND user_id = :userid LIMIT 1");
 		$st->execute(array(
@@ -57,6 +67,10 @@ class emailController extends imapController{
 			));
 
 		$result = $st->fetchAll();
+
+		foreach($result as $server){
+			emailController::multiexplode(array(":","/"),$server['mail_server']);
+		}
 
 		if(empty($result)) {
 			unset($_SESSION['data']);
@@ -133,10 +147,44 @@ class emailController extends imapController{
 	{
 		require('controllers/database.php');
 		
+		$i = 0;
+
+		$st = $db->prepare("SELECT * FROM outbox WHERE email_id = :id AND user_id = :userid AND concept = 0");
+		$st->execute(array(
+			':id' => $id, 
+			':userid' => $userid
+			));
+
+		$result = $st->fetchAll();
+
+		$_SESSION['sent'] = $result;
+	}
+
+	public function getConcepten($id, $userid)
+	{
+		require('controllers/database.php');
+		
+		$i = 0;
+
+		$st = $db->prepare("SELECT * FROM outbox WHERE email_id = :id AND user_id = :userid AND concept = '1'");
+		$st->execute(array(
+			':id' => $id, 
+			':userid' => $userid
+			));
+
+		$result = $st->fetchAll();
+
+		$_SESSION['concepten'] = $result;
+	}
+
+		public function getSpam($id, $userid)
+	{
+		require('controllers/database.php');
+		
 		global $date;
 		$i = 0;
 
-		imapController::getImapOutbox();
+		imapController::getImapTrash();
 	}
 
 	public function getTrash($id, $userid)
@@ -229,12 +277,181 @@ class emailController extends imapController{
 		$_SESSION['email_body'] = $result;
 	}
 
+	public function getEmailJunk($id, $timestamp, $userid)
+	{
+		require('controllers/database.php');
+
+		$st = $db->prepare("SELECT * FROM junk WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp LIMIT 1");
+		$st->execute(array(
+			':id' => $id, 
+			':userid' => $userid, 
+			':timestamp' => $timestamp
+			));
+
+		$result = $st->fetchAll();
+
+		$_SESSION['email_body'] = $result;
+	}
+
+	public function getEmailTrash($id, $timestamp, $userid)
+	{
+		require('controllers/database.php');
+
+		$st = $db->prepare("SELECT * FROM trash WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp LIMIT 1");
+		$st->execute(array(
+			':id' => $id, 
+			':userid' => $userid, 
+			':timestamp' => $timestamp
+			));
+
+		$result = $st->fetchAll();
+
+		$_SESSION['email_body'] = $result;
+	}
 
 	public function moveEmailTrash($id, $timestamp, $userid)
 	{
 		require('controllers/database.php');
+	}
 
+	public function conceptEmail($id, $timestamp, $userid, $message, $receiver, $subject, $bcc, $cc, $priority)
+	{
+		require('controllers/database.php');
 
+		$st = $db->prepare("INSERT INTO outbox(subject, message, receiver, date, user_id, email_id, bcc, cc, priority, concept) VALUES(:subject, :message, :receiver, :stamp, :user_id, :email_id, :bcc, :cc, :priority, 1)");
+		$st->execute(array(
+			':subject' => $subject, 
+			':message' => $message, 
+			':receiver' => $receiver, 
+			':stamp' => $timestamp, 
+			':user_id' => $userid,
+			':email_id' => $id,
+			':bcc' => $bcc,
+			':cc' => $cc,
+			':priority' => $priority
+			));
+	}
+
+	public function getConceptEmail($emailid, $timestamp, $userid)
+	{
+		require('controllers/database.php');
+
+		$st = $db->prepare("SELECT * FROM outbox WHERE email_id = :id AND user_id = :userid AND date = :timestamp");
+		$st->execute(array(
+			':id' => $emailid, 
+			':userid' => $userid, 
+			':timestamp' => $timestamp
+			));
+
+		$result = $st->fetchAll();
+
+		$_SESSION['concept'] = $result;
+	}
+
+	public function getSentEmail($emailid, $timestamp, $userid)
+	{
+		require('controllers/database.php');
+
+		$st = $db->prepare("SELECT * FROM outbox WHERE email_id = :id AND user_id = :userid AND date = :timestamp");
+		$st->execute(array(
+			':id' => $emailid, 
+			':userid' => $userid, 
+			':timestamp' => $timestamp
+			));
+
+		$result = $st->fetchAll();
+
+		$_SESSION['sent'] = $result;
+	}
+
+	public function storeEmail($receiver,$subject, $message,$from,$bijlageArray,$cc,$emailid,$userid)
+	{
+		require('controllers/database.php');
+
+		if (!filter_var($receiver, FILTER_VALIDATE_EMAIL)) {
+			makesafe($_SESSION['email_sent'] = 'email wrong');
+		} else {
+			
+			if(empty($subject)) {
+				$subject = "(no subject)";
+			}
+
+			$timestamp = time();
+
+			$st = $db->prepare("INSERT INTO outbox(subject, message, receiver, date, user_id, email_id, bcc, cc, priority) VALUES(:subject, :message, :receiver, :stamp, :user_id, :email_id, :bcc, :cc, :priority)");
+			$st->execute(array(
+				':subject' => $subject, 
+				':message' => $message, 
+				':receiver' => $receiver, 
+				':stamp' => $timestamp, 
+				':user_id' => $userid,
+				':email_id' => $userid,
+				':bcc' => "",
+				':cc' => $cc,
+				':priority' => ""
+				));
+
+			echo sendmailController::sendsmtp($receiver,$subject,$message,"<info@uniquemail.nl>",$bijlageArray,$cc);
+
+			makesafe($_SESSION['email_sent'] = 'success');
+		}
+		echo emailController::index();
+	}
+
+	public function attachment($receiver, $subject, $message, $from, $bijlageArray, $cc, $emailid, $userid, $file)
+	{
+		$target_dir = "attachments/";
+		$target_file = $target_dir . basename($file["name"]);
+		$uploadOk = 1;
+		$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
 		
+		$bijlageArray[0]["locatie"] = "/attachments/".$file['name']."";
+		$bijlageArray[0]["naam"] = $file['name'];
+
+		// Check if image file is a actual image or fake image
+		if(isset($file)) {
+		    $check = getimagesize($file["tmp_name"]);
+
+		    if($check !== false) {
+		        echo "File is an image - " . $check["mime"] . ".";
+		        $uploadOk = 1;
+		    } else {
+		        echo "File is not an image.";
+		        $uploadOk = 0;
+		    }
+		}
+		// Check if file already exists
+		if (file_exists($target_file)) {
+		    echo "Sorry, file already exists.";
+		    $uploadOk = 0;
+		}
+		// Check file size
+		if ($file["size"] > 500000) {
+		    echo "Sorry, your file is too large.";
+		    $uploadOk = 0;
+		}
+		// Allow certain file formats
+		if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+		&& $imageFileType != "gif" && $imageFileType != "pdf" && $imageFileType != "xlcs" 
+		&& $imageFileType != "txt" && $imageFileType != "php" && $imageFileType != "rar"
+		&& $imageFileType != "zip" && $imageFileType != "html" && $imageFileType != "css") 
+		{
+		    echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+		    $uploadOk = 0;
+		}
+		// Check if $uploadOk is set to 0 by an error
+		if ($uploadOk == 0) {
+		    echo "Sorry, your file was not uploaded.";
+		// if everything is ok, try to upload file
+		} else {
+		    if (move_uploaded_file($file["tmp_name"], $target_file)) {
+		        echo "The file ". basename( $file["name"]). " has been uploaded.";
+		    } else {
+		        echo "Sorry, there was an error uploading your file.";
+		    }
+		}
+
+		emailController::storeEmail($receiver,$subject,"<body>".$message."</body>","<info@uniquemail.nl>",$bijlageArray,$cc, $emailid, $userid);
 	}
 }
+
