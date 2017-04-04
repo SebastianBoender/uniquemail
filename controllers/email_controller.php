@@ -436,7 +436,7 @@ class emailController extends imapController{
 		&& $imageFileType != "txt" && $imageFileType != "php" && $imageFileType != "rar"
 		&& $imageFileType != "zip" && $imageFileType != "html" && $imageFileType != "css") 
 		{
-		    echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+		    echo "Sorry, .".$imageFileType." files are not allowed.";
 		    $uploadOk = 0;
 		}
 		// Check if $uploadOk is set to 0 by an error
@@ -452,6 +452,20 @@ class emailController extends imapController{
 		}
 
 		emailController::storeEmail($receiver,$subject,"<body>".$message."</body>","<info@uniquemail.nl>",$bijlageArray,$cc, $emailid, $userid);
+	}
+
+	public function makelinks($text)
+	{
+	    $text = eregi_replace('(((f|ht){1}tp://)[-a-zA-Z0-9@:%_\+.~#?&//=]+)',
+	    '<a target=_blank href="\\1">\\1</a>', $text);
+	    $text = eregi_replace('(((f|ht){1}tps://)[-a-zA-Z0-9@:%_\+.~#?&//=]+)',
+	    '<a target=_blank href="\\1">\\1</a>', $text);
+	    $text = eregi_replace('([[:space:]()[{}])(www.[-a-zA-Z0-9@:%_\+.~#?&//=]+)',
+	    '\\1<a target=_blank href="[http://\\2"]http://\\2">\\2</a>', $text);
+	    $text = eregi_replace('([_\.0-9a-z-]+@([0-9a-z][0-9a-z-]+\.)+[a-z]{2,3})',
+	    '<a href="mailto:\\1">\\1</a>', $text);
+	   
+	    return $text;
 	}
 }
 

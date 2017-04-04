@@ -30,6 +30,7 @@ foreach($email_body as $body):
 ?>
 
 <a href="reply?message=<?=$_GET['message']?>&id=<?=$id?>" class="btn btn-primary">Reply</a>
+<a href="reply?message=<?=$_GET['message']?>&id=<?=$id?>&all=1" class="btn btn-primary">Reply All</a>
 <a href="forward?message=<?=$_GET['message']?>&id=<?=$id?>" class="btn btn-primary">Forward</a>
 
 <br/><br/>
@@ -76,7 +77,7 @@ echo '
 	<label>Message:</label><br/>
 	<?php
 	if(!$body['message_html']){
-		echo nl2br($body['message']);
+		echo nl2br(emailController::makelinks($bodyMessage));
 	} else {
 		echo quoted_printable_decode($body['message_html']);
 	}

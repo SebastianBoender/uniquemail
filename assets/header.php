@@ -75,6 +75,11 @@ if(isset($_SESSION["email_sent"])) {
 }
 
 include("assets/navbar.php");
-include("assets/sidebar.php");
+if ($_SERVER['PHP_SELF'] != '/index.php') {
+  include("assets/sidebar.php");
+}
+
+echo $_SERVER['PHP_SELF'];
+
 
 ?>

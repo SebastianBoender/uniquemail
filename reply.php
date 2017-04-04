@@ -7,6 +7,7 @@ $_SESSION['user_id'] = 1;
 $userid = makesafe($_SESSION["user_id"]);
 $timestamp = makesafe($_GET['message']);
 $id = makesafe($_GET['id']);
+$all = "";
 
 if(isset($timestamp) && isset($_GET['message']) && isset($id) && isset($_GET['id'])){
 	echo emailController::getEmailMessage($id, $timestamp, $userid);
@@ -45,6 +46,11 @@ if(isset($_POST['send'])){
 
 	echo emailController::storeEmail($receiver,$subject,"<body>".$message."</body>","<info@uniquemail.nl>",$bijlageArray,$cc, $emailid, $userid);
 }
+
+if(isset($_GET['all'])){
+	$all = $_GET['all'];
+}
+
 
 ?>
 
@@ -93,6 +99,10 @@ foreach($email_body as $body):
 
 <label onclick="hideShowCC()">CC</label><br/>
 
+<?php
+if($all == 1){
+?>
+
 <div id="cc" class="hidden">
 	<p>
 		<input type="text" name="cc" value="<?=$body['cc']?>" placeholder="CC">
@@ -106,6 +116,27 @@ foreach($email_body as $body):
 		<input type="text" name="bcc" value="<?=$body['bcc']?>" placeholder="BCC">
 	</p>
 </div>
+
+<?php
+}else{
+?>
+<div id="cc" class="hidden">
+	<p>
+		<input type="text" name="cc" value="" placeholder="CC">
+	</p>
+</div>
+
+<label onclick="hideShowBCC()">BCC</label>
+
+<div id="bcc" class="hidden">
+	<p>
+		<input type="text" name="bcc" value="" placeholder="BCC">
+	</p>
+</div>
+<?php
+}
+?>
+
 
 <p>
 	<label>Priority:</label><br/>

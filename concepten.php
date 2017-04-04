@@ -48,8 +48,6 @@ if($i == 10){
     <td><a href="new?message=<?=$concept["date"]?>&id=<?=$id?>"><?=$concept['subject']?></a></td>
     <td><?=$concept['receiver']?></td>
     <td><?=date('d/m/Y', $concept['date'])?></td>
-    <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-trash"></span></td>
-        <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-floppy-disk"></span></td>
   </tr>
 
 

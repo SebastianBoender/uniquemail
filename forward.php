@@ -119,7 +119,31 @@ foreach($email_body as $body):
 
 <p>
 	<label>Message</label><br/>
-	<textarea name="message" rows="4" cols="50"><?=$body['message']?></textarea>
+	<textarea name="message" rows="30" cols="200">
+
+
+
+
+_________________________________________________________
+From: <?=$body['sender']?> &lt;<?=$body['sender_email']?>&gt;
+Sent: <?=date('d/m/Y H:i:s', $body['timestamp'])?>
+
+<?php
+if($body['cc'])
+{
+	echo 'CC: '.$body['cc'].'
+';
+}
+?>
+Subject: <?=$body['subject']?>
+ 
+
+
+
+
+	<?=$body['message']?>
+		
+	</textarea>
 </p>
 
 <p>

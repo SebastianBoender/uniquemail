@@ -13,10 +13,6 @@ if(isset($userid)) {
 	echo imapController::getImapJunk($id, $userid);
 }
 
-
-imapController::imapSend();
-
-
 if(isset($_SESSION['junk'])) {
     $junk = $_SESSION['junk'];
     unset($_SESSION['junk']);
@@ -51,8 +47,6 @@ if($i == 10){
     <td><?=$junk[$key]['from']?>@<?=$junk[$key]['host']?></td>
     <td><?=date('d/m/Y', $junk[$key]['date'])?></td>
     <td><?=$junk[$key]['size']/1000?> kb</td>
-    <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-trash"></span></td>
-        <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-floppy-disk"></span></td>
   </tr>
 
 

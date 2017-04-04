@@ -151,6 +151,7 @@ class imapController{
 		{
 			   $EmailHeaders = imap_headerinfo( $mb, $MID );
 			   $Body = imap_fetchbody( $mb, $MID, 1 );
+			   $Body_html = imap_fetchbody( $mb, $MID, 2 );
 
 			   $outbox[$MID]['date'] = strtotime($EmailHeaders->date);
 			   $outbox[$MID]['receiver'] = $EmailHeaders->toaddress;
@@ -163,8 +164,10 @@ class imapController{
 	   		   $outbox[$MID]['size'] = $EmailHeaders->Size;
 	   		   $outbox[$MID]['timestamp'] = $EmailHeaders->udate;
 	   		   $outbox[$MID]['message'] = $Body;
+   	   		   $outbox[$MID]['message_html'] = $Body_html;
 		}
 		rsort($outbox);
+		var_dump($outbox);
 	}
 
 	public function getImapTrash(){
@@ -193,6 +196,7 @@ class imapController{
 		{
 			   $EmailHeaders = imap_headerinfo( $mb, $MID );
 			   $Body = imap_fetchbody( $mb, $MID, 1 );
+			   $Body_html = imap_fetchbody( $mb, $MID, 2 );
 
 			   $trash[$MID]['date'] = strtotime($EmailHeaders->date);
 			   $trash[$MID]['receiver'] = $EmailHeaders->toaddress;
@@ -211,6 +215,7 @@ class imapController{
 	   		   $trash[$MID]['size'] = $EmailHeaders->Size;
 	   		   $trash[$MID]['timestamp'] = $EmailHeaders->udate;
 	   		   $trash[$MID]['message'] = $Body;
+	   		   $trash[$MID]['message_html'] = $Body_html;
 	   		   $trash[$MID]['mid'] = $MID;
 		}
 		rsort($trash);
@@ -276,6 +281,7 @@ class imapController{
 		{
 			   $EmailHeaders = imap_headerinfo( $mb, $MID );
 			   $Body = imap_fetchbody( $mb, $MID, 1 );
+			   $Body_html = imap_fetchbody( $mb, $MID, 2 );
 
 			   $junk[$MID]['date'] = strtotime($EmailHeaders->date);
 			   $junk[$MID]['receiver'] = $EmailHeaders->toaddress;
@@ -288,6 +294,7 @@ class imapController{
 	   		   $junk[$MID]['size'] = $EmailHeaders->Size;
 	   		   $junk[$MID]['timestamp'] = $EmailHeaders->udate;
 	   		   $junk[$MID]['message'] = $Body;
+	   		   $junk[$MID]['message_html'] = $Body_html;
 
 	   		    foreach($EmailHeaders->from as $from )
 				{
@@ -315,11 +322,12 @@ class imapController{
 		
 //		$emailid = 40;
 		foreach($junk as $key=>$waarde):
-			$st = $db->prepare("INSERT IGNORE INTO junk(subject, message, sender, sender_email, date, size, user_id, email_id, timestamp, attachment) VALUES(:subject, :message, :sender, :sender_email, :date, :size, :user_id, :email_id, :timestamp, :attachment)");
+			$st = $db->prepare("INSERT IGNORE INTO junk(subject, message, message_html, sender, sender_email, date, size, user_id, email_id, timestamp, attachment) VALUES(:subject, :message, :message_html, :sender, :sender_email, :date, :size, :user_id, :email_id, :timestamp, :attachment)");
 
 			$st->execute(array(
 				':subject' => $junk[$key]["subject"], 
 				':message' => $junk[$key]['message'],
+				':message_html' => $junk[$key]['message_html'],
 				':sender' => 'test', 
 				':sender_email' =>  'test', 
 				':date' => $junk[$key]['date'], 
@@ -344,17 +352,18 @@ class imapController{
 		
 //		$emailid = 40;
 		foreach($trash as $key=>$waarde):
-			$st = $db->prepare("INSERT IGNORE INTO trash(subject, message, sender, sender_email, date, size, user_id, email_id, timestamp) VALUES(:subject, :message, :sender, :sender_email, :date, :size, :user_id, :email_id, :timestamp)");
+			$st = $db->prepare("INSERT IGNORE INTO trash(subject, message, message_html, sender, sender_email, date, size, user_id, email_id, timestamp) VALUES(:subject, :message, :message_html, :sender, :sender_email, :date, :size, :user_id, :email_id, :timestamp)");
 
 			$st->execute(array(
-				':subject' => $trash[$key]["subject"], 
+				':subject' => $trash[$key]["subject"],
 				':message' => $trash[$key]['message'],
-				':sender' => 'test', 
-				':sender_email' =>  'test', 
-				':date' => $trash[$key]['date'], 
-				':size' => $trash[$key]["size"], 
-				':user_id' => $userid, 
-				':email_id' => $emailid, 
+				':message_html' => $trash[$key]['message_html'],
+				':sender' => 'test',
+				':sender_email' =>  'test',
+				':date' => $trash[$key]['date'],
+				':size' => $trash[$key]["size"],
+				':user_id' => $userid,
+				':email_id' => $emailid,
 				':timestamp' => $trash[$key]["timestamp"]
 				));
 		endforeach;
