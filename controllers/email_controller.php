@@ -48,7 +48,7 @@ class emailController extends imapController{
 	}
 
 
-	public function multiexplode ($delimiters,$string) {
+	public function multiexplode ($delimiters,$string){
 	    global $launch;
 
 	    $ready = str_replace($delimiters, $delimiters[0], $string);
@@ -134,12 +134,18 @@ class emailController extends imapController{
 	{
 		require('controllers/database.php');
 
-		global $date;
-		$i = 0;
-
 		imapController::getImapInbox();
 
-		$_SESSION['dates'] = $date;
+		global $inbox;
+
+		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid");
+		$st->execute(array(
+			':id' => $id,
+			':userid' => $userid
+			));
+
+		$result = $st->fetchAll();
+		$inbox = $result;
 	}
 
 
@@ -181,10 +187,19 @@ class emailController extends imapController{
 	{
 		require('controllers/database.php');
 		
-		global $date;
+		global $spam;
 		$i = 0;
 
-		imapController::getImapTrash();
+		imapController::getImapJunk();
+
+		$st = $db->prepare("SELECT * FROM junk WHERE email_id = :id AND user_id = :userid");
+		$st->execute(array(
+			':id' => $id,
+			':userid' => $userid
+			));
+
+		$result = $st->fetchAll();
+		$spam = $result;
 	}
 
 	public function getTrash($id, $userid)
@@ -192,19 +207,19 @@ class emailController extends imapController{
 		require('controllers/database.php');
 
 		global $trash;
+		global $deleted;
 		$i = 0;
 
 		imapController::getImapTrash();
 
-		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND delete_date != '0000-00-00 00:00:00'");
+		$st = $db->prepare("SELECT * FROM trash WHERE email_id = :id AND user_id = :userid AND delete_date = '0000-00-00 00:00:00'");
 		$st->execute(array(
 			':id' => $id, 
 			':userid' => $userid
 			));
 
 		$result = $st->fetchAll();
-
-		$_SESSION['trash'] = $trash;
+		$deleted = $result;
 	}
 
 
@@ -466,6 +481,24 @@ class emailController extends imapController{
 	    '<a href="mailto:\\1">\\1</a>', $text);
 	   
 	    return $text;
+	}
+
+	public function getInboxDatabase($id, $userid)
+	{
+		require('controllers/database.php');
+
+		global $inbox;
+
+		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid");
+		$st->execute(array(
+			':id' => $emailid, 
+			':userid' => $userid
+			));
+
+		$result = $st->fetchAll();
+
+		$inbox = $result;
+
 	}
 }
 

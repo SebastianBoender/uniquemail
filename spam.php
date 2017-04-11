@@ -10,15 +10,9 @@ $id = makesafe($_GET['id']);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if(isset($userid)) {
-	echo imapController::getImapJunk($id, $userid);
+	echo emailController::getSpam($id, $userid);
 }
 
-if(isset($_SESSION['junk'])) {
-    $junk = $_SESSION['junk'];
-    unset($_SESSION['junk']);
-} else {
-    $junk = "";
-}
 ?>
 
 
@@ -37,16 +31,16 @@ if(isset($_SESSION['junk'])) {
   </tr>
 
 <?php
-foreach($junk as $key=>$waarde):
+foreach($spam as $message):
 if($i == 10){
 	break;
 } else {
 ?>
   <tr>
-    <td><a href="readspam?message=<?=$junk[$key]["timestamp"]?>&id=<?=$id?>"><?=$junk[$key]['subject']?></a></td>
-    <td><?=$junk[$key]['from']?>@<?=$junk[$key]['host']?></td>
-    <td><?=date('d/m/Y', $junk[$key]['date'])?></td>
-    <td><?=$junk[$key]['size']/1000?> kb</td>
+    <td><a href="readspam?message=<?=$message["timestamp"]?>&id=<?=$id?>"><?=$message['subject']?></a></td>
+    <td><?=$message['sender']?></td>
+    <td><?=date('d/m/Y', $message['timestamp'])?></td>
+    <td><?=$message['size']/1000?> kb</td>
   </tr>
 
 

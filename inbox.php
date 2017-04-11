@@ -3,22 +3,13 @@
 include("assets/header.php");
 
 //Set user id (klant nummer)
-$_SESSION['user_id'] = 1;
-$userid = makesafe($_SESSION["user_id"]);
+$userid = 1;
 $i = 0;
 $id = makesafe($_GET['id']);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if(isset($userid)) {
-	echo emailController::getInbox($id, $userid);
-}
-
-
-if(isset($_SESSION['dates'])) {
-    $data = $_SESSION['dates'];
-    unset($_SESSION['dates']);
-} else {
-    $data = "";
+   echo emailController::getInbox($id, $userid);
 }
 ?>
 
@@ -38,17 +29,18 @@ if(isset($_SESSION['dates'])) {
   </tr>
 
 <?php
-foreach($data as $key=>$waarde):
+
+foreach($inbox as $message):
 if($i == 10){
-	break;
+  break;
 } else {
 ?>
   <tr>
-    <td><a href="read?message=<?=$date[$key]["timestamp"]?>&id=<?=$id?>"><?=$data[$key]['subject']?></a></td>
-    <td><?=$data[$key]['personal']?></td>
-    <td><?=date('d/m/Y', $data[$key]['date'])?></td>
-    <td><?=$data[$key]['size']/1000?> kb</td>
-    <td><a href="maildel?mailid=<?=$data[$key]['mid']?>&id=<?=$id?>"><span class="glyphicon glyphicon-trash"></span></td>
+    <td><a href="read?message=<?=$message["timestamp"]?>&id=<?=$id?>"><?=$message['subject']?></a></td>
+    <td><?=$message['sender']?></td>
+    <td><?=date('d/m/Y', $message['timestamp'])?></td>
+    <td><?=$message['size']/1000?> kb</td>
+    <td><a href="maildel?mailid=<?=$message['mid']?>&id=<?=$id?>"><span class="glyphicon glyphicon-trash"></span></td>
   </tr>
 
 
