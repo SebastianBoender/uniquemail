@@ -57,10 +57,11 @@ if(isset($_POST['send'])){
 	$id = makesafe($_GET['id']);
 	$priority = makesafe($_POST['priority']);
 	$emailid = $_GET['id'];
+	$from = "test";
 
 	if($_FILES['attachment']['tmp_name'] != ""){
 		$file = $_FILES['attachment'];
-		echo emailController::attachment($receiver, $subject,"<body>".$message."</body>","<info@uniquemail.nl", $bijlageArray, $cc, $emailid, $userid, $file);
+		echo emailController::attachment($receiver, $subject,"<body>".$message."</body>",$from, $bijlageArray, $cc, $cc, $emailid, $userid, $file);
 	} else {
 		echo emailController::storeEmail($receiver,$subject,"<body>".$message."</body>","<info@uniquemail.nl>",$bijlageArray,$cc, $emailid, $userid);
 	}

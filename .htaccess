@@ -18,3 +18,4 @@ RewriteRule ^reply?$ reply.php
 RewriteRule ^forward?$ forward.php
 RewriteRule ^readsent?$ readSentMessage.php
 RewriteRule ^undelete?$ undelete.php
+RewriteRule ^flag?$ flag.php

@@ -15,10 +15,20 @@ sendsmtp("info@uniquewebdesign.nl","Titel","<body>blabla</body>","FROM:Afzender 
 
 class sendmailController extends emailController {
 
-	function sendsmtp($to,$titel,$html,$from,$bijlageArray,$stylesheet=2,$cc="")
+	function sendsmtp($to,$titel,$html,$from,$bijlageArray,$stylesheet,$cc, $userid, $emailid)
 	{
 		global $_SERVER;
-		
+
+		require('controllers/database.php');
+		$st = $db->prepare("SELECT email FROM email_accounts WHERE user_id = :userid AND id = :emailid LIMIT 1");
+		$st->execute(array(
+			':userid' => $userid, 
+			':emailid' => $emailid
+			));
+
+		$result = $st->fetch();
+		$from = $result['email'];
+
 		$html = str_replace('&quot;','"',((($html))));
 		$html = nl2br($html);
 		

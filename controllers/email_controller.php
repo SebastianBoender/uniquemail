@@ -138,7 +138,7 @@ class emailController extends imapController{
 
 		global $inbox;
 
-		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid");
+		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid ORDER BY flag DESC");
 		$st->execute(array(
 			':id' => $id,
 			':userid' => $userid
@@ -280,7 +280,10 @@ class emailController extends imapController{
 	{
 		require('controllers/database.php');
 
-		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp LIMIT 1");
+		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp LIMIT 1; 
+							UPDATE inbox
+							SET unread = 0
+							WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp LIMIT 1;");
 		$st->execute(array(
 			':id' => $id, 
 			':userid' => $userid, 
@@ -392,6 +395,9 @@ class emailController extends imapController{
 			}
 
 			$timestamp = time();
+			$from = "";
+			$cc = "";
+			$stylesheet = "";
 
 			$st = $db->prepare("INSERT INTO outbox(subject, message, receiver, date, user_id, email_id, bcc, cc, priority) VALUES(:subject, :message, :receiver, :stamp, :user_id, :email_id, :bcc, :cc, :priority)");
 			$st->execute(array(
@@ -406,14 +412,14 @@ class emailController extends imapController{
 				':priority' => ""
 				));
 
-			echo sendmailController::sendsmtp($receiver,$subject,$message,"<info@uniquemail.nl>",$bijlageArray,$cc);
+			echo sendmailController::sendsmtp($receiver,$subject,$message,$from,$bijlageArray,$cc, $cc, $userid, $emailid);
 
 			makesafe($_SESSION['email_sent'] = 'success');
 		}
-		echo emailController::index();
+
 	}
 
-	public function attachment($receiver, $subject, $message, $from, $bijlageArray, $cc, $emailid, $userid, $file)
+	public function attachment($receiver, $subject, $message, $from, $bijlageArray, $stylesheet, $cc, $emailid, $userid, $file)
 	{
 		$target_dir = "attachments/";
 		$target_file = $target_dir . basename($file["name"]);
@@ -428,19 +434,14 @@ class emailController extends imapController{
 		    $check = getimagesize($file["tmp_name"]);
 
 		    if($check !== false) {
-		        echo "File is an image - " . $check["mime"] . ".";
 		        $uploadOk = 1;
 		    } else {
 		        echo "File is not an image.";
 		        $uploadOk = 0;
 		    }
 		}
-		// Check if file already exists
-		if (file_exists($target_file)) {
-		    echo "Sorry, file already exists.";
-		    $uploadOk = 0;
-		}
-		// Check file size
+	
+		// Check file siz
 		if ($file["size"] > 500000) {
 		    echo "Sorry, your file is too large.";
 		    $uploadOk = 0;
@@ -460,7 +461,6 @@ class emailController extends imapController{
 		// if everything is ok, try to upload file
 		} else {
 		    if (move_uploaded_file($file["tmp_name"], $target_file)) {
-		        echo "The file ". basename( $file["name"]). " has been uploaded.";
 		    } else {
 		        echo "Sorry, there was an error uploading your file.";
 		    }
@@ -483,22 +483,101 @@ class emailController extends imapController{
 	    return $text;
 	}
 
-	public function getInboxDatabase($id, $userid)
+	public function flagEmail($id, $timestamp, $userid)
+	{
+		require('controllers/database.php');
+
+		$st = $db->prepare("UPDATE inbox SET flag = CASE 
+							WHEN flag = 0 THEN 1
+							ELSE flag = 0
+							END WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp LIMIT 1");
+		$st->execute(array(
+			':id' => $id, 
+			':userid' => $userid, 
+			':timestamp' => $timestamp
+			));
+
+		return emailController::index();
+	}
+
+	public function markRead($ids, $userid, $id)
+	{
+		require('controllers/database.php');
+
+		$st = $db->prepare("UPDATE inbox SET unread = CASE 
+							WHEN unread = 1 THEN 0
+							ELSE unread = 0
+							END WHERE timestamp IN (".implode(',',$ids).")");
+		$st->execute(array(
+			':id' => $id, 
+			':userid' => $userid,
+			':timestamp' => implode(',',$ids)
+			));
+
+		return emailController::index();
+	}
+
+	public function markunRead($ids, $userid, $id)
+	{
+		require('controllers/database.php');
+
+		$st = $db->prepare("UPDATE inbox SET unread = CASE 
+							WHEN unread = 0 THEN 1
+							ELSE unread = 1
+							END WHERE timestamp IN (".implode(',',$ids).")");
+		$st->execute(array(
+			':id' => $id, 
+			':userid' => $userid,
+			':timestamp' => implode(',',$ids)
+			));
+
+		return emailController::index();
+	}
+
+	public function searchInbox($searchquery, $userid, $id)
 	{
 		require('controllers/database.php');
 
 		global $inbox;
 
-		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid");
+		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND subject LIKE :searchquery OR message LIKE :searchquery ORDER BY flag DESC");
 		$st->execute(array(
-			':id' => $emailid, 
-			':userid' => $userid
+			':id' => $id,
+			':userid' => $userid,
+			':searchquery' => '%'.$searchquery.'%'
 			));
 
 		$result = $st->fetchAll();
-
 		$inbox = $result;
+	}
 
+	public function paginate($table){
+		require('controllers/database.php');
+
+		global $paginate_result;
+		global $total_pages;
+		global $page;
+
+		$results_per_page = 10;
+
+		if (isset($_GET['page'])) {
+			$page = $_GET['page'];
+		} else { 
+			$page = 1; 
+		}
+
+		$start_from = ($page - 1) * $results_per_page;
+		$st = $db->prepare("SELECT * FROM $table ORDER BY flag DESC LIMIT $start_from, $results_per_page");
+		$st->execute();
+
+		$paginate_result = $st->fetchAll();
+
+
+		$st = $db->prepare("SELECT COUNT(ID) AS total FROM inbox");
+		$st->execute();
+
+		$count = $st->fetch(PDO::FETCH_ASSOC);
+
+		$total_pages = ceil($count['total'] / $results_per_page);
 	}
 }
-
