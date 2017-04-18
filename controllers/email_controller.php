@@ -138,7 +138,7 @@ class emailController extends imapController{
 
 		global $inbox;
 
-		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid ORDER BY flag DESC");
+		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND type = 1 ORDER BY flag DESC");
 		$st->execute(array(
 			':id' => $id,
 			':userid' => $userid
@@ -192,7 +192,7 @@ class emailController extends imapController{
 
 		imapController::getImapJunk();
 
-		$st = $db->prepare("SELECT * FROM junk WHERE email_id = :id AND user_id = :userid");
+		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND type = 2");
 		$st->execute(array(
 			':id' => $id,
 			':userid' => $userid

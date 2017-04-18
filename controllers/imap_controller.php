@@ -192,6 +192,7 @@ class imapController{
 		$mb = imap_open("{".$mailserver."}INBOX.Trash", $email_account, $password) or die('Failed to connect to the server: <br/>' . imap_last_error());
 
 		$messageCount = imap_num_msg($mb);
+		var_dump($messageCount);
 		for( $MID = 1; $MID <= $messageCount; $MID++ )
 		{
 			   $EmailHeaders = imap_headerinfo( $mb, $MID );
@@ -220,7 +221,7 @@ class imapController{
 		}
 		rsort($trash);
 
-		imapController::storeImapTrash();
+		imapController::storeImapTrash($trash);
 	}
 
 	protected function storeImapInbox()
@@ -322,7 +323,7 @@ class imapController{
 		
 //		$emailid = 40;
 		foreach($junk as $key=>$waarde):
-			$st = $db->prepare("INSERT IGNORE INTO junk(subject, message, message_html, sender, sender_email, date, size, user_id, email_id, timestamp, attachment) VALUES(:subject, :message, :message_html, :sender, :sender_email, :date, :size, :user_id, :email_id, :timestamp, :attachment)");
+			$st = $db->prepare("INSERT IGNORE INTO inbox(subject, message, message_html, sender, sender_email, date, size, user_id, email_id, timestamp, attachment, type) VALUES(:subject, :message, :message_html, :sender, :sender_email, :date, :size, :user_id, :email_id, :timestamp, :attachment, 2)");
 
 			$st->execute(array(
 				':subject' => $junk[$key]["subject"], 
@@ -341,7 +342,7 @@ class imapController{
 	}
 
 
-	protected function storeImapTrash()
+	protected function storeImapTrash($trash)
 	{
 		require('controllers/database.php');
 		
@@ -349,10 +350,9 @@ class imapController{
 
 		$emailid = $_GET['id'];
 		$userid = 1;
-		
-//		$emailid = 40;
+
 		foreach($trash as $key=>$waarde):
-			$st = $db->prepare("INSERT IGNORE INTO trash(subject, message, message_html, sender, sender_email, date, size, user_id, email_id, timestamp) VALUES(:subject, :message, :message_html, :sender, :sender_email, :date, :size, :user_id, :email_id, :timestamp)");
+			$st = $db->prepare("INSERT IGNORE INTO inbox(subject, message, message_html, sender, sender_email, date, size, user_id, email_id, timestamp, type) VALUES(:subject, :message, :message_html, :sender, :sender_email, :date, :size, :user_id, :email_id, :timestamp, 3)");
 
 			$st->execute(array(
 				':subject' => $trash[$key]["subject"],
@@ -366,7 +366,9 @@ class imapController{
 				':email_id' => $emailid,
 				':timestamp' => $trash[$key]["timestamp"]
 				));
+
 		endforeach;
+
 	}
 
 
