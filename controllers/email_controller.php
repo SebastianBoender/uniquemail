@@ -133,15 +133,15 @@ class emailController extends imapController{
 	public function getInbox($id, $userid)
 	{
 		require('controllers/database.php');
-
 		imapController::getImapInbox();
 
 		global $inbox;
 
-		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND type = 1 ORDER BY flag DESC");
+		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND type = :type ORDER BY flag DESC");
 		$st->execute(array(
 			':id' => $id,
-			':userid' => $userid
+			':userid' => $userid,
+			':type' => 1
 			));
 
 		$result = $st->fetchAll();
@@ -280,7 +280,7 @@ class emailController extends imapController{
 	{
 		require('controllers/database.php');
 
-		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp LIMIT 1; 
+		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp AND type = 1 LIMIT 1; 
 							UPDATE inbox
 							SET unread = 0
 							WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp LIMIT 1;");
@@ -299,7 +299,10 @@ class emailController extends imapController{
 	{
 		require('controllers/database.php');
 
-		$st = $db->prepare("SELECT * FROM junk WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp LIMIT 1");
+		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp AND type = 2 LIMIT 1;
+							UPDATE inbox
+							SET unread = 0
+							WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp AND type = 2 LIMIT 1;");
 		$st->execute(array(
 			':id' => $id, 
 			':userid' => $userid, 
@@ -399,7 +402,7 @@ class emailController extends imapController{
 			$cc = "";
 			$stylesheet = "";
 
-			$st = $db->prepare("INSERT INTO outbox(subject, message, receiver, date, user_id, email_id, bcc, cc, priority) VALUES(:subject, :message, :receiver, :stamp, :user_id, :email_id, :bcc, :cc, :priority)");
+			$st = $db->prepare("INSERT INTO inbox(subject, message, receiver, date, user_id, email_id, bcc, cc, priority) VALUES(:subject, :message, :receiver, :stamp, :user_id, :email_id, :bcc, :cc, :priority)");
 			$st->execute(array(
 				':subject' => $subject, 
 				':message' => $message, 
@@ -534,31 +537,22 @@ class emailController extends imapController{
 		return emailController::index();
 	}
 
-	public function searchInbox($searchquery, $userid, $id)
-	{
-		require('controllers/database.php');
-
-		global $inbox;
-
-		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND subject LIKE :searchquery OR message LIKE :searchquery ORDER BY flag DESC");
-		$st->execute(array(
-			':id' => $id,
-			':userid' => $userid,
-			':searchquery' => '%'.$searchquery.'%'
-			));
-
-		$result = $st->fetchAll();
-		$inbox = $result;
-	}
-
-	public function paginate($table){
+	public function paginate($table, $id, $userid){
 		require('controllers/database.php');
 
 		global $paginate_result;
 		global $total_pages;
 		global $page;
 
-		$results_per_page = 10;
+		$results_per_page = 10;	
+
+		if($table == "inbox"){
+			$type = 1;
+			imapController::getImapInbox();
+		} elseif($table == "spam"){
+			$type = 2;
+			imapController::getImapJunk();
+		}
 
 		if (isset($_GET['page'])) {
 			$page = $_GET['page'];
@@ -567,17 +561,32 @@ class emailController extends imapController{
 		}
 
 		$start_from = ($page - 1) * $results_per_page;
-		$st = $db->prepare("SELECT * FROM $table ORDER BY flag DESC LIMIT $start_from, $results_per_page");
-		$st->execute();
 
-		$paginate_result = $st->fetchAll();
+		if(isset($_POST['search'])){
+			if(!empty($_POST['searchquery'])){
+			    $searchquery = $_POST['searchquery'];
+			    $st = $db->prepare("SELECT * FROM inbox WHERE type = $type AND user_id = :userid AND email_id = :id AND subject LIKE :searchquery ORDER BY flag DESC LIMIT $start_from, $results_per_page");
+				$st->execute(array(
+					':id' => $id,
+					':userid' => $userid,
+					':searchquery' => '%'.$searchquery.'%'
+					));
 
+				$paginate_result = $st->fetchAll();
+		  }
+		} else {
+			$st = $db->prepare("SELECT * FROM inbox WHERE type = $type AND email_id = $id AND user_id = $userid ORDER BY flag DESC LIMIT $start_from, $results_per_page");
+			$st->execute();
 
-		$st = $db->prepare("SELECT COUNT(ID) AS total FROM inbox");
+			$paginate_result = $st->fetchAll();
+		}
+
+		$st = $db->prepare("SELECT COUNT(ID) AS total FROM inbox WHERE type = $type");
 		$st->execute();
 
 		$count = $st->fetch(PDO::FETCH_ASSOC);
 
 		$total_pages = ceil($count['total'] / $results_per_page);
+	
 	}
 }

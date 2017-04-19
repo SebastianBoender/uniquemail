@@ -232,10 +232,10 @@ class imapController{
 
 		$emailid = $_GET['id'];
 		$userid = 1;
-		
+
 //		$emailid = 40;
 		foreach($date as $key=>$waarde):
-			$st = $db->prepare("INSERT IGNORE INTO inbox(subject, message, message_html, sender, sender_email, cc, bcc, date, size, user_id, email_id, timestamp, attachment) VALUES(:subject, :message, :message_html, :sender, :sender_email, :cc, :bcc, :date, :size, :user_id, :email_id, :timestamp, :attachment)");
+			$st = $db->prepare("INSERT IGNORE INTO inbox(subject, message, message_html, sender, sender_email, cc, bcc, date, size, user_id, email_id, timestamp, attachment, type) VALUES(:subject, :message, :message_html, :sender, :sender_email, :cc, :bcc, :date, :size, :user_id, :email_id, :timestamp, :attachment, 1)");
 
 			$st->execute(array(
 				':subject' => $date[$key]["subject"], 
