@@ -107,7 +107,7 @@ foreach($data as $values):
 
 <p>
 	<label>To:</label><br/>
-	<input type="text" name="to" value="<?=$values['receiver']?>" placeholder="To">
+	<input type="text" name="to" id="tags" value="<?=$values['receiver']?>" placeholder="To">
 </p>
 
 <p>

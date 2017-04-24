@@ -5,6 +5,7 @@ require_once("controllers/safety_controller.php");
 require_once("controllers/imap_controller.php");
 require_once("controllers/email_controller.php");
 require_once("controllers/sendmail_controller.php");
+require_once("controllers/contacts_controller.php");
 
 
 session_start();
@@ -73,6 +74,16 @@ if(isset($_SESSION["email_sent"])) {
     }
     unset($_SESSION["email_sent"]);
 }
+
+if(isset($_SESSION["contacts_add"])) {
+  if($_SESSION["contacts_add"] == "success") {
+      echo '<div class="alert alert-success" style="margin-bottom:0;"><strong>Success! </strong>Contact added succesfully!</div>'; 
+    } else {
+      echo '<div class="alert alert-warning" style="margin-bottom:0;"><strong>Oops! </strong> Something went wrong..</div>';
+    }
+    unset($_SESSION["contacts_add"]);
+}
+
 
 include("assets/navbar.php");
 if ($_SERVER['PHP_SELF'] != '/index.php') {

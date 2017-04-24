@@ -486,18 +486,25 @@ class emailController extends imapController{
 	    return $text;
 	}
 
-	public function flagEmail($id, $timestamp, $userid)
+	public function flagEmail($id, $timestamp, $userid, $table)
 	{
 		require('controllers/database.php');
+
+		if($table == "inbox"){
+			$type = 1;
+		} else {
+			$type = 2;
+		}
 
 		$st = $db->prepare("UPDATE inbox SET flag = CASE 
 							WHEN flag = 0 THEN 1
 							ELSE flag = 0
-							END WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp LIMIT 1");
+							END WHERE email_id = :id AND user_id = :userid AND timestamp = :timestamp AND type = :type LIMIT 1");
 		$st->execute(array(
 			':id' => $id, 
 			':userid' => $userid, 
-			':timestamp' => $timestamp
+			':timestamp' => $timestamp,
+			':type' => $type
 			));
 
 		return emailController::index();
@@ -574,15 +581,25 @@ class emailController extends imapController{
 
 				$paginate_result = $st->fetchAll();
 		  }
-		} else {
+		} elseif($table == "inbox" || $table == "spam") {
 			$st = $db->prepare("SELECT * FROM inbox WHERE type = $type AND email_id = $id AND user_id = $userid ORDER BY flag DESC LIMIT $start_from, $results_per_page");
+			$st->execute();
+
+			$paginate_result = $st->fetchAll();
+		} elseif($table == "outbox"){
+			$st = $db->prepare("SELECT * FROM outbox WHERE email_id = $id AND user_id = $userid AND concept = 0 ORDER BY flag DESC LIMIT $start_from, $results_per_page");
 			$st->execute();
 
 			$paginate_result = $st->fetchAll();
 		}
 
-		$st = $db->prepare("SELECT COUNT(ID) AS total FROM inbox WHERE type = $type");
-		$st->execute();
+		if($table == "inbox" || $table == "spam"){
+			$st = $db->prepare("SELECT COUNT(ID) AS total FROM inbox WHERE type = $type");
+			$st->execute();
+		} elseif ($table == "outbox"){
+			$st = $db->prepare("SELECT COUNT(ID) AS total FROM outbox WHERE concept = 0");
+			$st->execute();
+		}
 
 		$count = $st->fetch(PDO::FETCH_ASSOC);
 

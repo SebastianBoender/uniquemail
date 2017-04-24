@@ -19,3 +19,4 @@ RewriteRule ^forward?$ forward.php
 RewriteRule ^readsent?$ readSentMessage.php
 RewriteRule ^undelete?$ undelete.php
 RewriteRule ^flag?$ flag.php
+RewriteRule ^contacts?$ contacts.php

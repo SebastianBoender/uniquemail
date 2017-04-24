@@ -3,59 +3,129 @@
 include("assets/header.php");
 
 //Set user id (klant nummer)
-$_SESSION['user_id'] = 1;
-$id = makesafe($_GET["id"]);
-$userid = makesafe($_SESSION["user_id"]);
+$userid = 1;
 $i = 0;
+$id = makesafe($_GET['id']);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
-if (isset($userid)) {
-	echo emailController::getOutbox($id, $userid);
+if(isset($userid)) {
+   echo emailController::paginate("outbox", $id, $userid);
 }
 
-if(isset($_SESSION['sent'])) {
-    $data = $_SESSION['sent'];
-    unset($_SESSION['sent']);
-} else {
-    $data = "";
+if(isset($_POST['save'])){
+  if(isset($_POST['formaction'])) {
+     $ids = $_POST['ids'];
+
+    if($_POST['formaction'] == 'markread'){
+       echo emailController::markRead($ids, $userid, $id);
+    }
+    if($_POST['formaction'] == 'markunread'){
+       echo emailController::markunRead($ids, $userid, $id);
+    } 
+  }
 }
 
+/*
+if(isset($_POST['search'])){
+  if(!empty($_POST['searchquery'])){
+    $searchquery = $_POST['searchquery'];
+    echo emailController::searchInbox($searchquery, $userid, $id, "inbox");
+  }
+}
+*/
 ?>
 
 
 <div class="main col-md-9 main_panel">
 <h1>Welkom Klant</h1>
                                          
-<div class="table-responsive" id="inbox">          
-<table class="table">
+<div class="table-responsive" id="inbox">
+
+<form method="POST" id="formIds">    
+<table id="myTable" class="table">
 <thead>
   <tr>
-    <th style="width: 70%;">Onderwerp</th>
+  <th></th>
+    <th style="width: 65%;">Onderwerp</th>
     <th style="width: 10%;">Ontvanger</th>
     <th style="width: 10%;">Datum</th>
     <th style="width: 10%;">Grootte</th>
+    <th style="width: 5%;"></th>
   </tr>
+</thead>
 
+ <tbody>
 <?php
-foreach($data as $out):
+
+foreach($paginate_result as $message):
 if($i == 10){
   break;
 } else {
 ?>
   <tr>
-    <td><a href="readsent?message=<?=$out["date"]?>&id=<?=$id?>"><?=$out['subject']?></a></td>
-    <td><?=$out['receiver']?></td>
-    <td><?=date('d/m/Y', $out['date'])?></td>
-    <td><?=$out['size']/1000?> kb</td>
-    <td><a href="maildel?mailid=['id']"><span class="glyphicon glyphicon-trash"></span></td>
-  </tr>
+  <td><input type="checkbox" name="ids[]" value="<?=$message['date']?>"></td>
+  <td>
+  <?php
+  $time = $message["date"];
+  $subject = $message["subject"];
+  
+  if($message['subject'] == ""){
+    echo '<a href="readsent?message='.$time.'&id='.$id.'">(Geen onderwerp)</a>';
+  } else {
+    echo '<a href="readsent?message='.$time.'&id='.$id.'">'.$subject.'</a>';
+  }
 
+  ?>
+
+  </td>
+    <td><?=$message['receiver']?></td>
+    <td><?=date('d/m/Y', $message['date'])?></td>
+    <td><?=$message['size']/1000?> kb</td>
+    <td><a href="maildel?mailid=<?=$message['mid']?>&id=<?=$id?>"><span class="glyphicon glyphicon-trash"></span></td>
 
 <?php
+  if($message['flag'] == 1){
+   echo '<td><a href="flag?table=inbox&id='.$id.'&message='.$time.'"><span class="glyphicon glyphicon-flag" style="color:red"></span></td>';
+  } else {
+   echo '<td><a href="flag?table=inbox&id='.$id.'&message='.$time.'"><span class="glyphicon glyphicon-flag"></span></td>';
+  }
+  echo '</tr>';
+
 $i++;
 }
 endforeach;
 ?>
+<a href="new?id=<?=$_GET['id']?>" class="btn btn-primary">New email</a>
+
+<select name="formaction">
+  <option value="markread">Mark as read</option>
+  <option value="markunread">Mark as unread</option>
+  <option value="flag">Flag</option>
+  <option value="unflag">Unflag</option>
+</select>
+
+<input type="submit" class="btn btn-primary" name="save" value="Save changes">
+<input type="text" name="searchquery" placeholder="Search...">
+<input type="submit" class="btn btn-primary" name="search" value="Search">
+
+
+<?php
+for ($i=1; $i<=$total_pages; $i++) {  // print links for all pages
+            echo "<a href='inbox?id=$id&user=sebas&page=".$i."'";
+            if ($i==$page)  echo " class='curPage'";
+            echo ">".$i."</a> "; 
+};
+?>
 
  </tbody>
 </table>
+
+<script>
+
+$(document).ready(function(){ 
+  $('#myTable').tablesorter(); 
+});
+</script>
+
+
+</form>

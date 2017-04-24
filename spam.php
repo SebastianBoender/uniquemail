@@ -77,9 +77,9 @@ if($i == 10){
 
 <?php
   if($message['flag'] == 1){
-   echo '<td><a href="flag?id='.$id.'&message='.$time.'"><span class="glyphicon glyphicon-flag" style="color:red"></span></td>';
+   echo '<td><a href="flag?table=spam&id='.$id.'&message='.$time.'"><span class="glyphicon glyphicon-flag" style="color:red"></span></td>';
   } else {
-   echo '<td><a href="flag?id='.$id.'&message='.$time.'"><span class="glyphicon glyphicon-flag"></span></td>';
+   echo '<td><a href="flag?table=spam&id='.$id.'&message='.$time.'"><span class="glyphicon glyphicon-flag"></span></td>';
   }
   echo '</tr>';
 

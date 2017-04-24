@@ -85,9 +85,9 @@ if($i == 10){
 
 <?php
   if($message['flag'] == 1){
-   echo '<td><a href="flag?id='.$id.'&message='.$time.'"><span class="glyphicon glyphicon-flag" style="color:red"></span></td>';
+   echo '<td><a href="flag?table=inbox&id='.$id.'&message='.$time.'"><span class="glyphicon glyphicon-flag" style="color:red"></span></td>';
   } else {
-   echo '<td><a href="flag?id='.$id.'&message='.$time.'"><span class="glyphicon glyphicon-flag"></span></td>';
+   echo '<td><a href="flag?table=inbox&id='.$id.'&message='.$time.'"><span class="glyphicon glyphicon-flag"></span></td>';
   }
   echo '</tr>';
 
@@ -96,6 +96,7 @@ $i++;
 endforeach;
 ?>
 <a href="new?id=<?=$_GET['id']?>" class="btn btn-primary">New email</a>
+<a href="contacts?id=<?=$_GET['id']?>" class="btn btn-primary">Contacts</a>
 
 <select name="formaction">
   <option value="markread">Mark as read</option>
