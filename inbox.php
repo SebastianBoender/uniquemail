@@ -25,14 +25,6 @@ if(isset($_POST['save'])){
   }
 }
 
-/*
-if(isset($_POST['search'])){
-  if(!empty($_POST['searchquery'])){
-    $searchquery = $_POST['searchquery'];
-    echo emailController::searchInbox($searchquery, $userid, $id, "inbox");
-  }
-}
-*/
 ?>
 
 
@@ -81,7 +73,7 @@ if($i == 10){
     <td><?=$message['sender']?></td>
     <td><?=date('d/m/Y', $message['timestamp'])?></td>
     <td><?=$message['size']/1000?> kb</td>
-    <td><a href="maildel?mailid=<?=$message['mid']?>&id=<?=$id?>"><span class="glyphicon glyphicon-trash"></span></td>
+    <td><a href="maildel?mailid=<?=$message['timestamp']?>&id=<?=$id?>"><span class="glyphicon glyphicon-trash"></span></td>
 
 <?php
   if($message['flag'] == 1){

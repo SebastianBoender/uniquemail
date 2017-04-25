@@ -15,7 +15,7 @@ $id = makesafe($_GET["id"]);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if (isset($emailid)) {
-    echo emailController::deleteFromTrash($emailid, $id);
+    echo emailController::deletetrashMessage($id, $userid, $emailid);
     return;
 }
 

@@ -113,7 +113,6 @@ for ($i=1; $i<=$total_pages; $i++) {  // print links for all pages
 </table>
 
 <script>
-
 $(document).ready(function(){ 
   $('#myTable').tablesorter(); 
 });

@@ -47,7 +47,6 @@ class emailController extends imapController{
 		return emailController::index();
 	}
 
-
 	public function multiexplode ($delimiters,$string){
 	    global $launch;
 
@@ -130,42 +129,6 @@ class emailController extends imapController{
 		return emailController::index();
 	}
 
-	public function getInbox($id, $userid)
-	{
-		require('controllers/database.php');
-		imapController::getImapInbox();
-
-		global $inbox;
-
-		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND type = :type ORDER BY flag DESC");
-		$st->execute(array(
-			':id' => $id,
-			':userid' => $userid,
-			':type' => 1
-			));
-
-		$result = $st->fetchAll();
-		$inbox = $result;
-	}
-
-
-	public function getOutbox($id, $userid)
-	{
-		require('controllers/database.php');
-		
-		$i = 0;
-
-		$st = $db->prepare("SELECT * FROM outbox WHERE email_id = :id AND user_id = :userid AND concept = 0");
-		$st->execute(array(
-			':id' => $id, 
-			':userid' => $userid
-			));
-
-		$result = $st->fetchAll();
-
-		$_SESSION['sent'] = $result;
-	}
-
 	public function getConcepten($id, $userid)
 	{
 		require('controllers/database.php');
@@ -181,45 +144,6 @@ class emailController extends imapController{
 		$result = $st->fetchAll();
 
 		$_SESSION['concepten'] = $result;
-	}
-
-		public function getSpam($id, $userid)
-	{
-		require('controllers/database.php');
-		
-		global $spam;
-		$i = 0;
-
-		imapController::getImapJunk();
-
-		$st = $db->prepare("SELECT * FROM inbox WHERE email_id = :id AND user_id = :userid AND type = 2");
-		$st->execute(array(
-			':id' => $id,
-			':userid' => $userid
-			));
-
-		$result = $st->fetchAll();
-		$spam = $result;
-	}
-
-	public function getTrash($id, $userid)
-	{
-		require('controllers/database.php');
-
-		global $trash;
-		global $deleted;
-		$i = 0;
-
-		imapController::getImapTrash();
-
-		$st = $db->prepare("SELECT * FROM trash WHERE email_id = :id AND user_id = :userid AND delete_date = '0000-00-00 00:00:00'");
-		$st->execute(array(
-			':id' => $id, 
-			':userid' => $userid
-			));
-
-		$result = $st->fetchAll();
-		$deleted = $result;
 	}
 
 
@@ -328,11 +252,6 @@ class emailController extends imapController{
 		$result = $st->fetchAll();
 
 		$_SESSION['email_body'] = $result;
-	}
-
-	public function moveEmailTrash($id, $timestamp, $userid)
-	{
-		require('controllers/database.php');
 	}
 
 	public function conceptEmail($id, $timestamp, $userid, $message, $receiver, $subject, $bcc, $cc, $priority)
@@ -527,6 +446,36 @@ class emailController extends imapController{
 		return emailController::index();
 	}
 
+	public function trashMessage($id, $userid, $emailid){
+		require('controllers/database.php');
+
+		$st = $db->prepare("UPDATE inbox SET deleted = CASE 
+							WHEN deleted = 1 THEN 0
+							ELSE deleted = 0
+							END WHERE timestamp = :timestamp AND user_id = :userid AND email_id = :id");
+		$st->execute(array(
+			':id' => $id, 
+			':userid' => $userid,
+			':timestamp' => $emailid
+			));
+
+		return emailController::index();
+	}
+
+	public function deletetrashMessage($id, $userid, $emailid){
+		require('controllers/database.php');
+
+		$st = $db->prepare("UPDATE inbox SET deleted = 2
+							WHERE timestamp = :timestamp AND user_id = :userid AND email_id = :id");
+		$st->execute(array(
+			':id' => $id, 
+			':userid' => $userid,
+			':timestamp' => $emailid
+			));
+
+		return emailController::index();
+	}
+
 	public function markunRead($ids, $userid, $id)
 	{
 		require('controllers/database.php');
@@ -572,17 +521,46 @@ class emailController extends imapController{
 		if(isset($_POST['search'])){
 			if(!empty($_POST['searchquery'])){
 			    $searchquery = $_POST['searchquery'];
-			    $st = $db->prepare("SELECT * FROM inbox WHERE type = $type AND user_id = :userid AND email_id = :id AND subject LIKE :searchquery ORDER BY flag DESC LIMIT $start_from, $results_per_page");
-				$st->execute(array(
-					':id' => $id,
-					':userid' => $userid,
-					':searchquery' => '%'.$searchquery.'%'
-					));
 
-				$paginate_result = $st->fetchAll();
+			    if($table == "inbox" || $table == "spam"){
+				    $st = $db->prepare("SELECT * FROM inbox WHERE type = $type AND user_id = :userid AND email_id = :id AND deleted = 0 AND subject LIKE :searchquery ORDER BY flag DESC LIMIT $start_from, $results_per_page");
+					$st->execute(array(
+						':id' => $id,
+						':userid' => $userid,
+						':searchquery' => '%'.$searchquery.'%'
+						));
+
+					$paginate_result = $st->fetchAll();
+
+				} elseif($table == "trash"){
+					$st = $db->prepare("SELECT * FROM inbox WHERE user_id = :userid AND email_id = :id AND deleted = 1 AND subject LIKE :searchquery ORDER BY flag DESC LIMIT $start_from, $results_per_page");
+					$st->execute(array(
+						':id' => $id,
+						':userid' => $userid,
+						':searchquery' => '%'.$searchquery.'%'
+						));
+
+					$paginate_result = $st->fetchAll();
+						
+				} elseif($table == "outbox"){
+					$st = $db->prepare("SELECT * FROM outbox WHERE user_id = :userid AND email_id = :id AND subject LIKE :searchquery ORDER BY flag DESC LIMIT $start_from, $results_per_page");
+					$st->execute(array(
+						':id' => $id,
+						':userid' => $userid,
+						':searchquery' => '%'.$searchquery.'%'
+						));
+
+					$paginate_result = $st->fetchAll();
+				}
 		  }
+
 		} elseif($table == "inbox" || $table == "spam") {
-			$st = $db->prepare("SELECT * FROM inbox WHERE type = $type AND email_id = $id AND user_id = $userid ORDER BY flag DESC LIMIT $start_from, $results_per_page");
+			$st = $db->prepare("SELECT * FROM inbox WHERE type = $type AND email_id = $id AND user_id = $userid AND deleted = 0 ORDER BY flag DESC LIMIT $start_from, $results_per_page");
+			$st->execute();
+
+			$paginate_result = $st->fetchAll();
+		} elseif($table == "trash"){
+			$st = $db->prepare("SELECT * FROM inbox WHERE email_id = $id AND user_id = $userid AND deleted = 1 ORDER BY flag DESC LIMIT $start_from, $results_per_page");
 			$st->execute();
 
 			$paginate_result = $st->fetchAll();
@@ -594,7 +572,10 @@ class emailController extends imapController{
 		}
 
 		if($table == "inbox" || $table == "spam"){
-			$st = $db->prepare("SELECT COUNT(ID) AS total FROM inbox WHERE type = $type");
+			$st = $db->prepare("SELECT COUNT(ID) AS total FROM inbox WHERE type = $type AND deleted = 0");
+			$st->execute();
+		} elseif ($table == "trash"){
+			$st = $db->prepare("SELECT COUNT(ID) AS total FROM inbox WHERE deleted = 1");
 			$st->execute();
 		} elseif ($table == "outbox"){
 			$st = $db->prepare("SELECT COUNT(ID) AS total FROM outbox WHERE concept = 0");
