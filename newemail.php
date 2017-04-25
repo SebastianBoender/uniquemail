@@ -59,8 +59,8 @@ if(isset($_POST['send'])){
 	$emailid = $_GET['id'];
 	$from = "test";
 
-	if($_FILES['attachment']['tmp_name'] != ""){
-		$file = $_FILES['attachment'];
+	if($_FILES['file']['tmp_name'] != ""){
+		$file = $_FILES['file'];
 		echo emailController::attachment($receiver, $subject,"<body>".$message."</body>",$from, $bijlageArray, $cc, $cc, $emailid, $userid, $file);
 	} else {
 		echo emailController::storeEmail($receiver,$subject,"<body>".$message."</body>","<info@uniquemail.nl>",$bijlageArray,$cc, $emailid, $userid);
@@ -91,6 +91,16 @@ function hideShowBCC() {
 		$('#bcc').addClass('hidden');
 	}
 };
+
+$(document).ready(function(){
+	var counter = 2;
+	$('#del_file').hide();
+	$('span#add_file').click(function(){
+		$('#file_tools').before('<div class="file_upload" id="f'+counter+'"><input name="file[]" type="file">'+counter+'</div>');
+		$('#del_file').fadeIn(0);
+	counter++;
+	});
+});
 </script>
 
 <div class="main col-md-9 main_panel">
@@ -205,10 +215,10 @@ endforeach;
 	</p>
 </div>
 
-<p>
-	<label>Attachment</label>
-	<input type="file" name="attachment" id="attachment">
-</p>
+<div class='file_upload' id='f1'><input name='file[]' type='file'/>1</div>
+	<div id='file_tools'>
+		<span class="glyphicon glyphicon-plus-sign" id='add_file'>
+	</div>
 
 <p>
 	<label>Priority:</label><br/>

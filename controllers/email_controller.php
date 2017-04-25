@@ -344,48 +344,29 @@ class emailController extends imapController{
 	public function attachment($receiver, $subject, $message, $from, $bijlageArray, $stylesheet, $cc, $emailid, $userid, $file)
 	{
 		$target_dir = "attachments/";
-		$target_file = $target_dir . basename($file["name"]);
-		$uploadOk = 1;
-		$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
-		
-		$bijlageArray[0]["locatie"] = "/attachments/".$file['name']."";
-		$bijlageArray[0]["naam"] = $file['name'];
+		$count = count($file['name']);
+		$o = 0;
+		$i = 1;
 
-		// Check if image file is a actual image or fake image
-		if(isset($file)) {
-		    $check = getimagesize($file["tmp_name"]);
+		if($count > 1){
+			while($i <= $count){
+				$target_file = $target_dir . basename($file["name"][$o]);
+				$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
+				$bijlageArray[$o]["locatie"] = "/attachments/".$file['name'][$o]."";
+				$bijlageArray[$o]["naam"] = $file['name'][$o];
 
-		    if($check !== false) {
-		        $uploadOk = 1;
-		    } else {
-		        echo "File is not an image.";
-		        $uploadOk = 0;
-		    }
-		}
-	
-		// Check file siz
-		if ($file["size"] > 500000) {
-		    echo "Sorry, your file is too large.";
-		    $uploadOk = 0;
-		}
-		// Allow certain file formats
-		if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
-		&& $imageFileType != "gif" && $imageFileType != "pdf" && $imageFileType != "xlcs" 
-		&& $imageFileType != "txt" && $imageFileType != "php" && $imageFileType != "rar"
-		&& $imageFileType != "zip" && $imageFileType != "html" && $imageFileType != "css") 
-		{
-		    echo "Sorry, .".$imageFileType." files are not allowed.";
-		    $uploadOk = 0;
-		}
-		// Check if $uploadOk is set to 0 by an error
-		if ($uploadOk == 0) {
-		    echo "Sorry, your file was not uploaded.";
-		// if everything is ok, try to upload file
-		} else {
-		    if (move_uploaded_file($file["tmp_name"], $target_file)) {
-		    } else {
-		        echo "Sorry, there was an error uploading your file.";
-		    }
+				move_uploaded_file($file["tmp_name"][$o], $target_file);
+
+				$i++;
+				$o++;
+			}
+		}else{
+			$target_file = $target_dir . basename($file["name"][0]);
+			$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
+			$bijlageArray[0]["locatie"] = "/attachments/".$file['name'][0]."";
+			$bijlageArray[0]["naam"] = $file['name'][0];
+
+			move_uploaded_file($file["tmp_name"][0], $target_file);
 		}
 
 		emailController::storeEmail($receiver,$subject,"<body>".$message."</body>","<info@uniquemail.nl>",$bijlageArray,$cc, $emailid, $userid);
