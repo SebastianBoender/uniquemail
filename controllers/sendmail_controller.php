@@ -1,8 +1,7 @@
 <?php
 
-
 /*
-voorbeeld gebruik:
+voorbeeld gebruik bijlagen (sendsmtp() functie):
 
 $bijlageArray = array();
 $bijlageArray[0]["locatie"] = "/tmp/tmp.pdf";
@@ -15,10 +14,84 @@ sendsmtp("info@uniquewebdesign.nl","Titel","<body>blabla</body>","FROM:Afzender 
 
 class sendmailController extends emailController {
 
+
+	public function attachment($receiver, $subject, $message, $from, $bijlageArray, $stylesheet, $cc, $emailid, $userid, $file)
+	{
+		//Indien er een of meerdere attachments worden verstuurd, slaat deze functie de attachment(s) op, en geeft ze vervolgens mee aan de volgende functie: StoreEmail()
+
+		$target_dir = "attachments/";
+		$count = count($file['name']);
+		$o = 0;
+		$i = 1;
+
+		//Deze if statement checked of er 1 of meerdere attachments zijn toegevoegd aan de email, en slaat ze vervolgens op op de server en stopt ze in de $bijlageArray[]
+		if($count > 1){
+			while($i <= $count){
+				$target_file = $target_dir . basename($file["name"][$o]);
+				$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
+				$bijlageArray[$o]["locatie"] = "/attachments/".$file['name'][$o]."";
+				$bijlageArray[$o]["naam"] = $file['name'][$o];
+
+				move_uploaded_file($file["tmp_name"][$o], $target_file);
+
+				$i++;
+				$o++;
+			}
+		}else{
+			$target_file = $target_dir . basename($file["name"][0]);
+			$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
+			$bijlageArray[0]["locatie"] = "/attachments/".$file['name'][0]."";
+			$bijlageArray[0]["naam"] = $file['name'][0];
+
+			move_uploaded_file($file["tmp_name"][0], $target_file);
+		}
+
+		sendmailController::storeEmail($receiver,$subject,"<body>".$message."</body>","<info@uniquemail.nl>",$bijlageArray,$cc, $emailid, $userid);
+	}
+
+public function storeEmail($receiver,$subject, $message,$from,$bijlageArray,$cc,$emailid,$userid)
+	{
+		//De storeEmail() functie slaat de email op in de outbox (verzonden berichten)
+		require('controllers/database.php');
+
+		if (!filter_var($receiver, FILTER_VALIDATE_EMAIL)) {
+			makesafe($_SESSION['email_sent'] = 'email wrong');
+		} else {
+			
+			if(empty($subject)) {
+				$subject = "(no subject)";
+			}
+
+			$timestamp = time();
+			$from = "";
+			$cc = "";
+			$stylesheet = "";
+
+			$st = $db->prepare("INSERT INTO inbox(subject, message, receiver, date, user_id, email_id, bcc, cc, priority) VALUES(:subject, :message, :receiver, :stamp, :user_id, :email_id, :bcc, :cc, :priority)");
+			$st->execute(array(
+				':subject' => $subject, 
+				':message' => $message, 
+				':receiver' => $receiver, 
+				':stamp' => $timestamp, 
+				':user_id' => $userid,
+				':email_id' => $userid,
+				':bcc' => "",
+				':cc' => $cc,
+				':priority' => ""
+				));
+
+			echo sendmailController::sendsmtp($receiver,$subject,$message,$from,$bijlageArray,$cc, $cc, $userid, $emailid);
+
+			makesafe($_SESSION['email_sent'] = 'success');
+		}
+
+	}
+
+
 	function sendsmtp($to,$titel,$html,$from,$bijlageArray,$stylesheet,$cc, $userid, $emailid)
 	{
 		global $_SERVER;
-
+		//De email word nu met het geselecteerde email adres naar de ontvanger gestuurd d.m.v van een php Mail() functie, indien er bijlage zijn geupload worden deze meegestuurd
 		require('controllers/database.php');
 		$st = $db->prepare("SELECT email FROM email_accounts WHERE user_id = :userid AND id = :emailid LIMIT 1");
 		$st->execute(array(

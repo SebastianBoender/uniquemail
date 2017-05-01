@@ -61,9 +61,9 @@ if(isset($_POST['send'])){
 
 	if($_FILES['file']['tmp_name'] != ""){
 		$file = $_FILES['file'];
-		echo emailController::attachment($receiver, $subject,"<body>".$message."</body>",$from, $bijlageArray, $cc, $cc, $emailid, $userid, $file);
+		echo sendmailController::attachment($receiver, $subject,"<body>".$message."</body>",$from, $bijlageArray, $cc, $cc, $emailid, $userid, $file);
 	} else {
-		echo emailController::storeEmail($receiver,$subject,"<body>".$message."</body>","<info@uniquemail.nl>",$bijlageArray,$cc, $emailid, $userid);
+		echo sendmailController::storeEmail($receiver,$subject,"<body>".$message."</body>","<info@uniquemail.nl>",$bijlageArray,$cc, $emailid, $userid);
 	}
 }
 

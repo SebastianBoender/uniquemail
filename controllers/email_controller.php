@@ -3,6 +3,7 @@ class emailController extends imapController{
 
 	public function index()
 	{
+		//Deze functie redirect terug naar de vorige pagina indien er een vorige pagina was, anders redirect hij naar de homepage
 		if(isset($_SERVER['HTTP_REFERER'])) {
 	    	$previous = $_SERVER['HTTP_REFERER'];
 	    	header('Location: '.$previous.'');
@@ -18,6 +19,7 @@ class emailController extends imapController{
 
 	public function getEmails($userid)
 	{
+		//Deze functie haalt alle email accounts (inboxen) van de klant op
 		require('controllers/database.php');
 		$st = $db->prepare("SELECT * FROM email_accounts WHERE user_id = :userid AND delete_date = '0000-00-00 00:00:00'");
 		$st->bindValue(':userid', $userid);
@@ -30,6 +32,7 @@ class emailController extends imapController{
 
 	public function addEmail($email, $userid, $afzender, $mailserver, $password, $port, $ssl)
 	{
+		//Met deze functie kan de klant nieuwe email accounts (inboxen) toevoegen aan de database
 		require('controllers/database.php');
 		$mailserver_final = "".$mailserver.":".$port."/".$ssl."";
 
@@ -47,16 +50,9 @@ class emailController extends imapController{
 		return emailController::index();
 	}
 
-	public function multiexplode ($delimiters,$string){
-	    global $launch;
-
-	    $ready = str_replace($delimiters, $delimiters[0], $string);
-	    $launch = explode($delimiters[0], $ready);
-	    return  $launch;
-	}
-
 	public function getSingleEmail($id, $userid)
 	{
+		//Deze functie haalt het geselecteerde email account uit de database als de klant een email wilt editten
 		global $launch;
 		require('controllers/database.php');
 		$st = $db->prepare("SELECT * FROM email_accounts WHERE id = :id AND user_id = :userid LIMIT 1");
@@ -68,7 +64,7 @@ class emailController extends imapController{
 		$result = $st->fetchAll();
 
 		foreach($result as $server){
-			emailController::multiexplode(array(":","/"),$server['mail_server']);
+			generalController::multiexplode(array(":","/"),$server['mail_server']);
 		}
 
 		if(empty($result)) {
@@ -83,6 +79,7 @@ class emailController extends imapController{
 
 	public function editEmail($email, $id, $userid, $password, $mailserver, $afzender, $port, $ssl)
 	{
+		//Als de klant een email account (inbox) bewerkt, dan word deze functie gebruikt om de nieuwe gegevens op te slaan in de database
 		require('controllers/database.php');
 		$mailserver_final = "".$mailserver.":".$port."/".$ssl."";
 
@@ -114,6 +111,7 @@ class emailController extends imapController{
 
 	public function deleteEmailAddress($id, $userid)
 	{
+		//Deze functie verwijderd het geselecteerde email account uit de database
 		require('controllers/database.php');
 		$st = $db->prepare("UPDATE email_accounts SET delete_date = :delete_date WHERE id = :id AND user_id = :userid");
 		$st->execute(array(
@@ -131,6 +129,7 @@ class emailController extends imapController{
 
 	public function getConcepten($id, $userid)
 	{
+		//Deze functie haalt alle emails op uit de database die opgeslagen zijn als concept
 		require('controllers/database.php');
 		
 		$i = 0;
@@ -256,6 +255,7 @@ class emailController extends imapController{
 
 	public function conceptEmail($id, $timestamp, $userid, $message, $receiver, $subject, $bcc, $cc, $priority)
 	{
+		//Deze functie slaat een email op in de database als concept
 		require('controllers/database.php');
 
 		$st = $db->prepare("INSERT INTO outbox(subject, message, receiver, date, user_id, email_id, bcc, cc, priority, concept) VALUES(:subject, :message, :receiver, :stamp, :user_id, :email_id, :bcc, :cc, :priority, 1)");
@@ -274,6 +274,7 @@ class emailController extends imapController{
 
 	public function getConceptEmail($emailid, $timestamp, $userid)
 	{
+		//Deze functie haalt het geselecteerde concept op uit de database zodat de gebruiker hem kan bewerken
 		require('controllers/database.php');
 
 		$st = $db->prepare("SELECT * FROM outbox WHERE email_id = :id AND user_id = :userid AND date = :timestamp");
@@ -302,88 +303,6 @@ class emailController extends imapController{
 		$result = $st->fetchAll();
 
 		$_SESSION['sent'] = $result;
-	}
-
-	public function storeEmail($receiver,$subject, $message,$from,$bijlageArray,$cc,$emailid,$userid)
-	{
-		require('controllers/database.php');
-
-		if (!filter_var($receiver, FILTER_VALIDATE_EMAIL)) {
-			makesafe($_SESSION['email_sent'] = 'email wrong');
-		} else {
-			
-			if(empty($subject)) {
-				$subject = "(no subject)";
-			}
-
-			$timestamp = time();
-			$from = "";
-			$cc = "";
-			$stylesheet = "";
-
-			$st = $db->prepare("INSERT INTO inbox(subject, message, receiver, date, user_id, email_id, bcc, cc, priority) VALUES(:subject, :message, :receiver, :stamp, :user_id, :email_id, :bcc, :cc, :priority)");
-			$st->execute(array(
-				':subject' => $subject, 
-				':message' => $message, 
-				':receiver' => $receiver, 
-				':stamp' => $timestamp, 
-				':user_id' => $userid,
-				':email_id' => $userid,
-				':bcc' => "",
-				':cc' => $cc,
-				':priority' => ""
-				));
-
-			echo sendmailController::sendsmtp($receiver,$subject,$message,$from,$bijlageArray,$cc, $cc, $userid, $emailid);
-
-			makesafe($_SESSION['email_sent'] = 'success');
-		}
-
-	}
-
-	public function attachment($receiver, $subject, $message, $from, $bijlageArray, $stylesheet, $cc, $emailid, $userid, $file)
-	{
-		$target_dir = "attachments/";
-		$count = count($file['name']);
-		$o = 0;
-		$i = 1;
-
-		if($count > 1){
-			while($i <= $count){
-				$target_file = $target_dir . basename($file["name"][$o]);
-				$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
-				$bijlageArray[$o]["locatie"] = "/attachments/".$file['name'][$o]."";
-				$bijlageArray[$o]["naam"] = $file['name'][$o];
-
-				move_uploaded_file($file["tmp_name"][$o], $target_file);
-
-				$i++;
-				$o++;
-			}
-		}else{
-			$target_file = $target_dir . basename($file["name"][0]);
-			$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
-			$bijlageArray[0]["locatie"] = "/attachments/".$file['name'][0]."";
-			$bijlageArray[0]["naam"] = $file['name'][0];
-
-			move_uploaded_file($file["tmp_name"][0], $target_file);
-		}
-
-		emailController::storeEmail($receiver,$subject,"<body>".$message."</body>","<info@uniquemail.nl>",$bijlageArray,$cc, $emailid, $userid);
-	}
-
-	public function makelinks($text)
-	{
-	    $text = eregi_replace('(((f|ht){1}tp://)[-a-zA-Z0-9@:%_\+.~#?&//=]+)',
-	    '<a target=_blank href="\\1">\\1</a>', $text);
-	    $text = eregi_replace('(((f|ht){1}tps://)[-a-zA-Z0-9@:%_\+.~#?&//=]+)',
-	    '<a target=_blank href="\\1">\\1</a>', $text);
-	    $text = eregi_replace('([[:space:]()[{}])(www.[-a-zA-Z0-9@:%_\+.~#?&//=]+)',
-	    '\\1<a target=_blank href="[http://\\2"]http://\\2">\\2</a>', $text);
-	    $text = eregi_replace('([_\.0-9a-z-]+@([0-9a-z][0-9a-z-]+\.)+[a-z]{2,3})',
-	    '<a href="mailto:\\1">\\1</a>', $text);
-	   
-	    return $text;
 	}
 
 	public function flagEmail($id, $timestamp, $userid, $table)
@@ -459,6 +378,7 @@ class emailController extends imapController{
 
 	public function markunRead($ids, $userid, $id)
 	{
+		//Deze functie markeert de geselecteerde emails als gelezen
 		require('controllers/database.php');
 
 		$st = $db->prepare("UPDATE inbox SET unread = CASE 
@@ -474,7 +394,7 @@ class emailController extends imapController{
 		return emailController::index();
 	}
 
-	public function paginate($table, $id, $userid){
+	public function getInboxes($table, $id, $userid){
 		require('controllers/database.php');
 
 		global $paginate_result;

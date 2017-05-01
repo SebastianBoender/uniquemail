@@ -9,7 +9,7 @@ $id = makesafe($_GET['id']);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if(isset($userid)) {
-   echo emailController::paginate("outbox", $id, $userid);
+   echo emailController::getInboxes("outbox", $id, $userid);
 }
 
 if(isset($_POST['save'])){
@@ -25,14 +25,6 @@ if(isset($_POST['save'])){
   }
 }
 
-/*
-if(isset($_POST['search'])){
-  if(!empty($_POST['searchquery'])){
-    $searchquery = $_POST['searchquery'];
-    echo emailController::searchInbox($searchquery, $userid, $id, "inbox");
-  }
-}
-*/
 ?>
 
 

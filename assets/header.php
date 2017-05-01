@@ -2,6 +2,7 @@
 //Include all controller files
 require_once("controllers/database.php");
 require_once("controllers/safety_controller.php");
+require_once("controllers/general_controller.php");
 require_once("controllers/imap_controller.php");
 require_once("controllers/email_controller.php");
 require_once("controllers/sendmail_controller.php");
