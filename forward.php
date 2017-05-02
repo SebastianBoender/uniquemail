@@ -6,7 +6,7 @@ include("assets/header.php");
 $_SESSION['user_id'] = 1;
 $userid = makesafe($_SESSION["user_id"]);
 $timestamp = makesafe($_GET['message']);
-$id = makesafe($_GET['id']);
+$id = makesafe($_GET['id']);s
 
 if(isset($timestamp) && isset($_GET['message']) && isset($id) && isset($_GET['id'])){
 	echo actionController::getEmailMessage($id, $timestamp, $userid);
@@ -44,7 +44,7 @@ if(isset($_POST['send'])){
 	$emailid = $_GET['id'];
 
 	echo emailController::storeEmail($receiver,$subject,"<body>".$message."</body>","<info@uniquemail.nl>",$bijlageArray,$cc, $emailid, $userid);
-}
+}	
 
 ?>
 
