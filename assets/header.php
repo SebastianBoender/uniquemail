@@ -7,6 +7,8 @@ require_once("controllers/imap_controller.php");
 require_once("controllers/email_controller.php");
 require_once("controllers/sendmail_controller.php");
 require_once("controllers/contacts_controller.php");
+require_once("controllers/inbox_controller.php");
+require_once("controllers/action_controller.php");
 
 
 session_start();

@@ -9,7 +9,7 @@ $timestamp = makesafe($_GET['message']);
 $id = makesafe($_GET['id']);
 
 if(isset($timestamp) && isset($_GET['message']) && isset($id) && isset($_GET['id'])){
-	echo emailController::getEmailTrash($id, $timestamp, $userid);
+	echo inboxController::getEmailTrash($id, $timestamp, $userid);
 }
 
 if(isset($_SESSION['email_body'])){
@@ -54,7 +54,7 @@ echo '
 	<?php
 	if(!$body['message_html']){
 		$bodyMessage = str_replace(array("=20", "="), "", $body['message']);
-		echo nl2br(emailController::generalController($bodyMessage));
+		echo nl2br(generalController::makelinks($bodyMessage));
 	} else {
 		echo quoted_printable_decode($body['message_html']);
 	}

@@ -9,7 +9,7 @@ $timestamp = makesafe($_GET['message']);
 $id = makesafe($_GET['id']);
 
 if(isset($timestamp) && isset($_GET['message']) && isset($id) && isset($_GET['id'])){
-	echo emailController::getSentEmail($id, $timestamp, $userid);
+	echo inboxController::getSentEmail($id, $timestamp, $userid);
 }
 
 if(isset($_SESSION['sent'])){

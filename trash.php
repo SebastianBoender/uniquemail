@@ -10,7 +10,7 @@ $userid = makesafe($_SESSION["user_id"]);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if(isset($userid)) {
-   echo emailController::getInboxes("trash", $id, $userid);
+   echo inboxController::getInboxes("trash", $id, $userid);
 }
 
 if(isset($_POST['save'])){
@@ -18,10 +18,10 @@ if(isset($_POST['save'])){
      $ids = $_POST['ids'];
 
     if($_POST['formaction'] == 'markread'){
-       echo emailController::markRead($ids, $userid, $id);
+       echo actionController::markRead($ids, $userid, $id);
     }
     if($_POST['formaction'] == 'markunread'){
-       echo emailController::markunRead($ids, $userid, $id);
+       echo actionController::markunRead($ids, $userid, $id);
     } 
   }
 }
@@ -30,10 +30,10 @@ if(isset($_POST['save'])){
 
 <div class="main col-md-9 main_panel">
 <h1>Welkom Klant</h1>
-                                         
+
 <div class="table-responsive" id="inbox">
 
-<form method="POST" id="formIds">    
+<form method="POST" id="formIds">
 <table id="myTable" class="table">
 <thead>
   <tr>

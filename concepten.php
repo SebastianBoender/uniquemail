@@ -7,11 +7,11 @@ $_SESSION['user_id'] = 1;
 $userid = makesafe($_SESSION["user_id"]);
 $i = 0;
 $id = makesafe($_GET['id']);
-$emailid = makesafe($_GET['email']);
+$emailid = makesafe($_GET['id']);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if(isset($userid)) {
-	echo emailController::getConcepten($id, $userid);
+	echo inboxController::getConcepten($id, $userid);
 }
 
 

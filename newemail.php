@@ -22,7 +22,7 @@ if(isset($_GET['email'])){
 if(isset($_GET['message'])){
   $timestamp = $_GET['message'];
 
-  echo emailController::getConceptEmail($emailid, $timestamp, $userid);
+  echo inboxController::getConceptEmail($emailid, $timestamp, $userid);
 }
 
 
@@ -44,7 +44,7 @@ if(isset($_POST['concept'])){
 	$id = makesafe($_GET['id']);
 	$priority = makesafe($_POST['priority']);
 
-	echo emailController::conceptEmail($id, $timestamp, $userid, $message, $receiver, $subject, $bcc, $cc, $priority);
+	echo actionController::saveconceptEmail($id, $timestamp, $userid, $message, $receiver, $subject, $bcc, $cc, $priority);
 }
 
 if(isset($_POST['send'])){

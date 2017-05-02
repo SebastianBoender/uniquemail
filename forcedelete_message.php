@@ -1,9 +1,6 @@
 <?php
 //Include all controller files
-require_once("controllers/database.php");
-require_once("controllers/safety_controller.php");
-require_once("controllers/imap_controller.php");
-require_once("controllers/email_controller.php");
+include("assets/header.php");
 
 session_start();
 
@@ -15,7 +12,7 @@ $id = makesafe($_GET["id"]);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if (isset($emailid)) {
-    echo emailController::deletetrashMessage($id, $userid, $emailid);
+    echo actionController::deletetrashMessage($id, $userid, $emailid);
     return;
 }
 

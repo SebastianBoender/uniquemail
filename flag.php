@@ -6,5 +6,5 @@ $id = $_GET['id'];
 $timestamp = $_GET['message'];
 $table = $_GET['table'];
 
-echo emailController::flagEmail($id, $timestamp, $userid, $table);
+echo actionController::flagEmail($id, $timestamp, $userid, $table);
 ?>

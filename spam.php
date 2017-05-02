@@ -9,7 +9,7 @@ $id = makesafe($_GET['id']);
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if(isset($userid)) {
-   echo emailController::getInboxes("spam", $id, $userid);
+   echo inboxController::getInboxes("spam", $id, $userid);
 }
 
 if(isset($_POST['save'])){
@@ -17,10 +17,10 @@ if(isset($_POST['save'])){
      $ids = $_POST['ids'];
 
     if($_POST['formaction'] == 'markread'){
-       echo emailController::markRead($ids, $userid, $id);
+       echo actionController::markRead($ids, $userid, $id);
     }
     if($_POST['formaction'] == 'markunread'){
-       echo emailController::markunRead($ids, $userid, $id);
+       echo actionController::markunRead($ids, $userid, $id);
     } 
   }
 }
