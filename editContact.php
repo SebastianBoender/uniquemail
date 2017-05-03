@@ -8,17 +8,18 @@ $i = 0;
 $id = makesafe($_GET['id']);
 $name = "";
 $email = "";
+$contactid = makesafe($_GET['contact']); 
 
 //Check if post exists, and make variables safe to prevent XSS attacks/exploiting
 if(isset($_POST['email'])) {
   $name = $_POST['name'];
   $email = $_POST['email'];
   $company = $_POST['company'];
-  contactController::addContacts($name, $email, $company, $userid, $id);
+  contactController::editContacts($name, $email, $company, $userid, $id, $contactid);
 }
 
-if(isset($userid, $id)) {
-  contactController::getContacts($userid, $id);
+if(isset($userid, $id, $contactid)) {
+  contactController::getSingleContact($userid, $id, $contactid);
   if(isset($_SESSION['contacts'])){
      $data = $_SESSION['contacts'];
     unset($_SESSION["contacts"]);
@@ -32,48 +33,24 @@ if(isset($userid, $id)) {
 <div class="table-responsive" id="inbox">
 
 <form method="POST">
+
 <p>
   <label>Name</label>
-  <input type="text" name="name" placeholder="Name"/>
+  <input type="text" name="name" value="<?=$contact['name']?>" />
 </p>
 
 <p>
   <label>Email</label>
-  <input type="text" name="email" placeholder="Email"/>
+  <input type="text" name="email" value="<?=$contact['email']?>" />
 </p>
 
 <p>
   <label>Company</label>
-  <input type="text" name="company" placeholder="Company"/>
+  <input type="text" name="company" value="<?=$contact['company']?>" />
 </p>
 
-<input type="submit" value="Save"/>
+<input type="submit" value="Update"/>
 </form>
-
-<table id="myTable" class="table">
-<thead>
-<tr>
-<th>Name</th>
-<th>Email</th>
-<th>Company</th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<?php
-foreach($data as $contact):
-?>
-<tr>
-<td><?=$contact['name']?></td>
-<td><?=$contact['email']?></td>
-<td><?=$contact['company']?></td>
-<td><a href="editcontact?id=<?=$id?>&contact=<?=$contact['id']?>">Edit</a></td>
-</tr>
-<?php
-endforeach;
-?>
-</tbody>
-</table>
 
 </div>
 </div>

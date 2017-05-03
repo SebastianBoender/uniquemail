@@ -32,6 +32,39 @@ class contactController{
 		makesafe($_SESSION['contacts_add'] = 'success');
 	}
 
+	public function editContacts($name, $email, $company, $userid, $id, $contactid)
+	{
+		require('controllers/database.php');
+
+		$st = $db->prepare("UPDATE contacts SET name = :name, company = :company, email = :email WHERE user_id = :userid AND email_id = :emailid AND id = :contactid");
+		$st->execute(array(
+			':name' => $name, 
+			':email' => $email, 
+			':company' => $company, 
+			':userid' => $userid, 
+			':emailid' => $id,
+			':contactid' => $contactid
+			));
+
+		makesafe($_SESSION['contacts_edit'] = 'success');
+	}
+
+	public function getSingleContact($userid, $id, $contactid)
+	{
+		require('controllers/database.php');
+
+		global $contact;
+
+		$st = $db->prepare("SELECT * FROM contacts WHERE user_id = :userid AND email_id = :emailid AND id = :contactid LIMIT 1");
+		$st->execute(array(
+			':userid' => $userid,
+			':emailid' => $id,
+			':contactid' => $contactid
+			));
+
+		$contact = $st->fetch(PDO::FETCH_ASSOC);
+	}
+
 }
 
 ?>
