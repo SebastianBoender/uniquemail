@@ -126,4 +126,16 @@ class emailController extends imapController{
 
 		return emailController::index();
 	}
+
+	public function lastActive($id, $userid){
+		require('controllers/database.php');
+		$st = $db->prepare("UPDATE email_accounts set last_active = :currentTime WHERE id = :emailid AND user_id = :userid");
+		$st->execute(array( 
+			':currentTime' => time(),
+			':emailid' => $id,
+			':userid' => $userid
+			));
+
+		echo time();
+	}
 }

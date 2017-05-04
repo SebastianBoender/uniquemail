@@ -5,6 +5,8 @@ class inboxController extends imapController{
 		//Deze functie haalt verschillende tabellen op, bijvoorbeeld: inbox, outbox, trash en spam. Ook kan deze functie zoeken op bepaalde zoekwoorden in de geselecteerde map
 		require('controllers/database.php');
 
+		emailController::lastActive($id, $userid);
+
 		global $paginate_result;
 		global $total_pages;
 		global $page;
