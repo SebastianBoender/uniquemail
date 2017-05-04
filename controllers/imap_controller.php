@@ -27,7 +27,7 @@ class imapController{
 
 		$messageCount = imap_num_msg($mb);
 
-		if($messageCount > 0 ){
+		if(isset($_GET['refresh']) && $messageCount > 0 ){
 
 			for( $MID = 1; $MID <= $messageCount; $MID++ )
 			{
@@ -120,6 +120,8 @@ class imapController{
 				file_put_contents('attachments/'.$attachments[1]['filename'].'', $attachments[1]['attachment']);
 
 				imapController::storeImapInbox();
+			} else {
+				header("Location: http://".$_SERVER["HTTP_HOST"]."/uniquemail/inbox?id=".$id);		
 			}
 	}
 
@@ -177,7 +179,7 @@ class imapController{
 
 		$messageCount = imap_num_msg($mb);
 
-		if($messageCount > 0 ){
+		if(isset($_GET['refresh']) && $messageCount > 0 ){
 
 				for( $MID = 1; $MID <= $messageCount; $MID++ )
 				{
@@ -209,6 +211,8 @@ class imapController{
 				rsort($junk);
 
 				imapController::storeImapJunk();
+		} else {
+			header("Location: http://".$_SERVER["HTTP_HOST"]."/uniquemail/spam?id=".$id);		
 		}
 	}
 
@@ -264,6 +268,12 @@ class imapController{
 
 		imap_delete($mb, '1:*');
 		imap_expunge($mb);
+
+		if($imapfolder == ""){
+			header("Location: http://".$_SERVER["HTTP_HOST"]."/uniquemail/inbox?id=".$id);
+		} elseif ($imapfolder == "INBOX.Spam"){
+			header("Location: http://".$_SERVER["HTTP_HOST"]."/uniquemail/spam?id=".$id);
+		}
 	}
 }
 

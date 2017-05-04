@@ -89,6 +89,7 @@ endforeach;
 ?>
 <a href="new?id=<?=$_GET['id']?>" class="btn btn-primary">New email</a>
 <a href="contacts?id=<?=$_GET['id']?>" class="btn btn-primary">Contacts</a>
+<a href="inbox?id=<?=$_GET['id']?>&refresh=1" class="btn btn-primary">Refresh</a>
 
 <select name="formaction">
   <option value="markread">Mark as read</option>

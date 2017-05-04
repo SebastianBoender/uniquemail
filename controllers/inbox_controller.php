@@ -14,10 +14,18 @@ class inboxController extends imapController{
 		//De variable $table geeft aan om welke inbox het gaat (inbox, outbox, trash of spam). Als het om inbox of junk gaat dan word eerst alle nieuwe mail van de imap opgehaald via de getImapInbox() of getImapJunk() functie
 		if($table == "inbox"){
 			$type = 1;
-			imapController::getImapInbox();
+			if(isset($_GET['refresh'])){
+				if($_GET['refresh'] == 1){
+				imapController::getImapInbox();
+				}
+			}
 		} elseif($table == "spam"){
 			$type = 2;
-			imapController::getImapJunk();
+			if(isset($_GET['refresh'])){
+				if($_GET['refresh'] == 1){
+				imapController::getImapJunk();
+				}
+			}
 		}
 
 		//Hier word gekeken op welke page we zitten, aangezien het maximaal te tonen resultaten per pagina op 10 staat

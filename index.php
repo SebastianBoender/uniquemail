@@ -58,7 +58,7 @@ foreach($data as $user):
 
   <tr>
     <td><?=$user["email"]?></td>
-    <td><a href="inbox?id=<?=$user['id']?>&user=<?=$user['naam']?>" class="btn btn-success">Access</a></td>    
+    <td><a href="inbox?id=<?=$user['id']?>&refresh=1" class="btn btn-success">Access</a></td>    
     <td><a href="edit?id=<?=$user['id']?>" class="btn btn-warning">Edit</a></td>    
     <td><a href="delete?id=<?=$user['id']?>" class="btn btn-danger">Delete</a></td> 
   </tr>
