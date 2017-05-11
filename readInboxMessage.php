@@ -78,7 +78,7 @@ echo '
 	<?php
 	if(!$body['message_html']){
 		$bodyMessage = str_replace(array("=20", "="), "", $body['message']);
-		echo nl2br(generalController::makelinks($bodyMessage));
+		echo nl2br(generalController::makelinks(htmlentities($bodyMessage, ENT_QUOTES)));
 	} else {
 		echo quoted_printable_decode($body['message_html']);
 	}

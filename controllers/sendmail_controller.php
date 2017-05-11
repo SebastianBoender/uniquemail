@@ -103,7 +103,6 @@ public function storeEmail($receiver,$subject, $message,$from,$bijlageArray,$cc,
 		$from = $result['email'];
 
 		$html = str_replace('&quot;','"',((($html))));
-		$html = nl2br($html);
 		
 		preg_match_all('/"\"file:(.*)\""/',$html,$matches); 
 

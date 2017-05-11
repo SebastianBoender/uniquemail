@@ -50,7 +50,7 @@ if(isset($_POST['concept'])){
 if(isset($_POST['send'])){
 	$timestamp = time();
 	$subject = makesafe($_POST['subject']);
-	$message = makesafe($_POST['message']);
+	$message = $_POST['message'];
 	$receiver = makesafe($_POST['to']);
 	$bcc = makesafe($_POST['bcc']);
 	$cc = makesafe($_POST['cc']);
@@ -68,6 +68,9 @@ if(isset($_POST['send'])){
 }
 
 ?>
+
+<script src="https://cloud.tinymce.com/stable/tinymce.min.js?apiKey=lejxineg1bgwxcj8jbo9qah74v5yuzcf3tx737wukx05y8o0"></script>
+<script>tinymce.init({ selector:'textarea' });</script>
 
 <script>
 function hideShowCC() {
