@@ -57,6 +57,7 @@ if(isset($userid, $id)) {
 <th>Email</th>
 <th>Company</th>
 <th></th>
+<th></th>
 </tr>
 </thead>
 <tbody>
@@ -68,6 +69,7 @@ foreach($data as $contact):
 <td><?=$contact['email']?></td>
 <td><?=$contact['company']?></td>
 <td><a href="editcontact?id=<?=$id?>&contact=<?=$contact['id']?>">Edit</a></td>
+<td><a href="deletecontact?id=<?=$id?>&contact=<?=$contact['id']?>">Delete</a></td>
 </tr>
 <?php
 endforeach;

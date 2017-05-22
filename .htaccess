@@ -21,3 +21,4 @@ RewriteRule ^undelete?$ undelete.php
 RewriteRule ^flag?$ flag.php
 RewriteRule ^contacts?$ contacts.php
 RewriteRule ^editcontact?$ editContact.php
+RewriteRule ^deletecontact?$ deleteContact.php

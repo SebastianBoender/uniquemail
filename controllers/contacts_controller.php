@@ -5,7 +5,7 @@ class contactController{
 	{
 		require('controllers/database.php');
 
-		$st = $db->prepare("SELECT * FROM contacts WHERE user_id = :userid AND email_id = :emailid");
+		$st = $db->prepare("SELECT * FROM contacts WHERE user_id = :userid AND email_id = :emailid AND deleted = 0");
 		$st->execute(array(
 			':userid' => $userid,
 			':emailid' => $id
@@ -63,6 +63,20 @@ class contactController{
 			));
 
 		$contact = $st->fetch(PDO::FETCH_ASSOC);
+	}
+
+	public function deleteContact($userid, $id, $contactid)
+	{
+		require ('controllers/database.php');
+
+		$st = $db->prepare("UPDATE contacts SET deleted = 1 WHERE email_id = :emailid AND user_id = :userid AND id = :contactid");
+		$st->execute(array(
+			':userid' => $userid, 
+			':emailid' => $id, 
+			':contactid' => $contactid
+			));
+
+		emailController::index();
 	}
 
 }
