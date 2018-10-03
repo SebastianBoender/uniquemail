@@ -1,0 +1,15 @@
+/*-----Check box----------*/
+.custom-checkbox{ position: relative; }
+.custom-checkbox input{position: absolute; left: 2px;	top: 3px; margin: 0; z-index: 0;width:0;display:none;}
+.custom-checkbox label{display: block; position: relative; z-index: 1; font-size:20px; line-height: 1; padding:5px 0 5px 30px;	margin:5px 0; cursor: pointer;}
+.custom-checkbox label { background:url(../images/chk_boxes.png) no-repeat;}
+.custom-checkbox label{	background-position: 0 -77px;}
+.custom-checkbox label.checked{	background-position: 0 0;}
+
+/*-----Radio buttons ----------*/
+.custom-radio { position: relative; }
+.custom-radio input {position: absolute; left: 2px;	top: 3px; margin: 0; z-index: 0;width:0;display:none;}
+.custom-radio label {display: inline-block;position: relative;z-index: 1;font-size:20px;line-height: 1;padding: 0 0 0 26px;margin:5px 0;cursor: pointer;}
+.custom-radio label { background: url(../images/radio_btn.png) no-repeat; }
+.custom-radio label {background-position: 0 6px;}
+.custom-radio label.checked {background-position: 0 -78px;}
